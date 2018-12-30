@@ -35,3 +35,5 @@ pyyaml==5.1
 redis==2.10.6
 # We use html2text for one-off migration from HTML to markdown.
 html2text
+# autocomplete/searchable select widgets for the admin, used by the theses system
+django-autocomplete-light==3.2.10
