@@ -24,6 +24,7 @@
     "bootstrap": "^4.3",
     "bootstrap-sortable": "git://github.com/drvic10k/bootstrap-sortable.git#ff650fd17cc2872f4031d355fa6382066d064e87",
     "fullcalendar": "^3.10.0",
+    "bowser": "^2.1.0",
     "extendable-error-class": "^0.1.1",
     "http-status-codes": "^1.3.0",
     "immutability-helper": "^2.7.1",
