@@ -9,11 +9,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 
-from apps.users.models import Student, Employee
-from .models import Thesis
+from apps.users.models import Student, Employee, BaseUser
+from .models import Thesis, get_num_ungraded_for_emp
 from . import serializers
 from .drf_permission_classes import ThesisPermissions
-from .users import get_theses_board
+from .permissions import is_thesis_staff
+from .users import get_theses_board, is_theses_board_member, is_master_rejecter
 from .enums import ThesisTypeFilter
 
 
@@ -59,6 +60,9 @@ class ThesesViewSet(viewsets.ModelViewSet):
         sort_dir = self.request.query_params.get(THESIS_SORT_DIR_NAME, "")
 
         user = self.request.user
+        if requested_type == ThesisTypeFilter.UNGRADED and not is_theses_board_member(self.request.user):
+            raise exceptions.NotFound()
+
         theses = Thesis.rest_objects.get_queryset().filter_by_type(
             requested_type,
         ).filter_by_user(user)
@@ -69,8 +73,19 @@ class ThesesViewSet(viewsets.ModelViewSet):
             theses = theses.filter_by_title(requested_title)
         if requested_advisor_name:
             theses = theses.filter_by_advisor(requested_advisor_name)
-
         return theses.sort(sort_column, sort_dir)
+
+    def get_serializer_context(self):
+        """When serializing votes for a thesis, we need to know the user type
+        determining it for every thesis would be expensive as it requires
+        a DB hit, so it's a good idea to do it here and pass it to the serializer
+        """
+        result = super().get_serializer_context()
+        user = self.request.user
+        result["user"] = user
+        result["is_staff"] = is_thesis_staff(user)
+        result["is_employee"] = BaseUser.is_employee(user)
+        return result
 
     @staticmethod
     def _parse_thesis_type(type_str: Optional[str]):
@@ -106,6 +121,23 @@ def get_current_user(request):
     """Allows the front end to query the current thesis user role"""
     serializer = serializers.CurrentUserSerializer(request.user)
     return Response(serializer.data)
+
+
+@api_view(http_method_names=["get"])
+@permission_classes((permissions.IsAuthenticated,))
+def get_is_master_rejecter(request):
+    """Allows the front end to determine whether the current user has master rejecter rights"""
+    return Response(is_master_rejecter(request.user))
+
+
+@api_view(http_method_names=["get"])
+@permission_classes((permissions.IsAuthenticated,))
+def get_num_ungraded(request):
+    """Allows the front end to query the number of ungraded theses for the current user"""
+    user = request.user
+    if not is_theses_board_member(user):
+        raise exceptions.NotFound()
+    return Response(get_num_ungraded_for_emp(user))
 
 
 class PersonAutocompletePagination(PageNumberPagination):

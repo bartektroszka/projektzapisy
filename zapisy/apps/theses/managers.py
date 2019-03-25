@@ -7,10 +7,11 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Value, When, Case, BooleanField, QuerySet, Q
 from django.db.models.functions import Concat, Lower
+from django.db.models.expressions import RawSQL
 
 from apps.users.models import BaseUser
 from .enums import (
-    ThesisKind, ThesisStatus, ThesisTypeFilter,
+    ThesisKind, ThesisStatus, ThesisTypeFilter, ThesisVote,
     ENGINEERS_KINDS, BACHELORS_KINDS, BACHELORS_OR_ENGINEERS_KINDS,
     ISIM_KINDS, NOT_READY_STATUSES
 )
@@ -23,7 +24,7 @@ class APIQueryset(models.QuerySet):
             status=ThesisStatus.IN_PROGRESS
         ).exclude(_is_archived=True).filter(reserved_until__isnull=True)
 
-    def filter_by_type(self: QuerySet, thesis_type: ThesisTypeFilter) -> QuerySet:
+    def filter_by_type(self: QuerySet, thesis_type: ThesisTypeFilter, user: User) -> QuerySet:
         """Returns only theses matching the specified type filter from the specified queryset"""
         if thesis_type == ThesisTypeFilter.EVERYTHING:
             return self
@@ -50,7 +51,13 @@ class APIQueryset(models.QuerySet):
         elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS_OR_ENGINEERS:
             return self.filter(kind__in=BACHELORS_OR_ENGINEERS_KINDS).filter_only_available()
         elif thesis_type == ThesisTypeFilter.AVAILABLE_ISIM:
+<<<<<<< HEAD
             return self.filter(kind__in=ISIM_KINDS).filter_only_available()
+=======
+            return self.filter_only_available(self.filter(kind__in=ISIM_KINDS))
+        elif thesis_type == ThesisTypeFilter.UNGRADED:
+            return self.filter_only_ungraded(user)
+>>>>>>> Add vote-related backend & frontend code
         # Should never get here
         return self
 
@@ -84,6 +91,29 @@ class APIQueryset(models.QuerySet):
         # this is an error situation, one of the conditions above should have caught it
         return self
 
+    def filter_only_ungraded(self: QuerySet, voter: User):
+        """
+        Filter the given queryset to only contain
+        all _ungraded_ theses for a given board member.
+        A thesis is _ungraded_ if the voter has not cast a vote at all
+        or manually set it to none (not possible from the client UI currently).
+        The `voter` user must be a theses board member.
+        """
+        # Uses custom SQL - I couldn't get querysets to do what I wanted them to;
+        # doing .exclude(votes__value__ne=none, votes__voter=emp) doesn't do what you want,
+        # it ands two selects together rather than and two conditions in one select
+        return self.filter(
+            # While voting for rejected theses is allowed, they're not "priority",
+            # so we don't count them here
+            status=ThesisStatus.BEING_EVALUATED
+        ).annotate(definite_votes=RawSQL(
+            """
+            select count(*) from theses_thesisvotebinding where
+            thesis_id=theses_thesis.id and voter_id=%s and value<>%s
+            """,
+            (voter.employee.pk, ThesisVote.NONE.value)
+        )).filter(definite_votes=0)
+
     def sort(self: QuerySet, sort_column: str, sort_dir: str) -> QuerySet:
         """Sort the specified queryset first by archived status (unarchived theses first),
         then by the specified column in the specified direction,
@@ -113,7 +143,9 @@ class APIManager(models.Manager):
             *APIManager.fields_for_prefetching("advisor"),
             *APIManager.fields_for_prefetching("supporting_advisor"),
         ).prefetch_related(
-            "students"
+            "students",
+            "votes",
+            "votes__voter"
         ).annotate(
             _advisor_name=Concat(
                 "advisor__user__first_name", Value(" "), "advisor__user__last_name"

@@ -6,9 +6,11 @@ from typing import Optional
 from django.contrib.auth.models import User
 from apps.users.models import Employee, BaseUser
 
+from .enums import UNVOTEABLE_STATUSES
 from .models import Thesis, ThesisStatus
 from .users import (
-    is_theses_board_member, is_theses_admin, is_theses_regular_employee
+    is_theses_admin, is_theses_regular_employee,
+    is_theses_board_member, is_master_rejecter,
 )
 
 
@@ -83,7 +85,9 @@ def can_change_status_to(user: User, thesis: Thesis, new_status: ThesisStatus) -
     """
     old_status = ThesisStatus(thesis.status)
     return (
-        is_thesis_staff(user) or
+        is_theses_admin(user) or
+        is_master_rejecter(user) or
+        is_theses_board_member(user) and new_status != ThesisStatus.RETURNED_FOR_CORRECTIONS or
         old_status == ThesisStatus.IN_PROGRESS and new_status == ThesisStatus.DEFENDED
     )
 
@@ -95,3 +99,36 @@ def can_set_advisor(user: User, advisor: Optional[Employee]) -> bool:
     (that is, `can_modify_thesis` returns True)
     """
     return is_thesis_staff(user) or (BaseUser.is_employee(user) and user.employee == advisor)
+
+
+def can_cast_vote_as_user(caster: User, user: User) -> bool:
+    """Can the specified user cast a vote in the other user's name?"""
+    return is_theses_admin(caster) or is_theses_board_member(user) and caster == user
+
+
+def can_change_vote_for_thesis(user: Employee, thesis: Thesis) -> bool:
+    """Can the specified user change votes for the specified thesis?"""
+    return (
+        is_theses_admin(user) or
+        is_theses_board_member(user) and ThesisStatus(thesis.status) not in UNVOTEABLE_STATUSES
+    )
+
+
+def can_see_thesis_rejection_reason(
+    thesis: Thesis, is_staff: bool, is_employee: bool, user: User
+):
+    """Should the official rejection reason be disclosed to the specified user?
+    As an optimization, is_staff/is_employee is passed directly so that we don't need to check
+    that in this function (this will be called for every serialized thesis)
+    """
+    return (
+        is_staff or
+        is_employee and (thesis.advisor == user.employee or thesis.auxiliary_advisor == user.employee)
+    )
+
+
+def can_see_thesis_votes(is_staff: bool):
+    """Should the votes for a thesis be disclosed to this user?
+    As above, this takes a bool argument as an optimization
+    """
+    return is_staff

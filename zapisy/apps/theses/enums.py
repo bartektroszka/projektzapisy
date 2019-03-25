@@ -42,6 +42,7 @@ class ThesisTypeFilter(Enum):
     AVAILABLE_BACHELORS = 10
     AVAILABLE_BACHELORS_OR_ENGINEERS = 11
     AVAILABLE_ISIM = 12
+    UNGRADED = 13
 
     DEFAULT = EVERYTHING
 
@@ -66,6 +67,22 @@ ISIM_KINDS = (
 NOT_READY_STATUSES = (
     ThesisStatus.BEING_EVALUATED,
     ThesisStatus.RETURNED_FOR_CORRECTIONS
+)
+
+
+class ThesisVote(ChoicesEnum):
+    NONE = 1, "brak głosu"
+    REJECTED = 2, "odrzucona"
+    ACCEPTED = 3, "zaakceptowana"
+
+
+"""Voting for a thesis in one of these statuses is not permitted
+for regular board members
+"""
+UNVOTEABLE_STATUSES = (
+    ThesisStatus.ACCEPTED,
+    ThesisStatus.IN_PROGRESS,
+    ThesisStatus.DEFENDED
 )
 
 
