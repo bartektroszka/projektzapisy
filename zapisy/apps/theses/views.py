@@ -60,11 +60,12 @@ class ThesesViewSet(viewsets.ModelViewSet):
         sort_dir = self.request.query_params.get(THESIS_SORT_DIR_NAME, "")
 
         user = self.request.user
-        if requested_type == ThesisTypeFilter.UNGRADED and not is_theses_board_member(self.request.user):
+
+        if requested_type == ThesisTypeFilter.UNGRADED and not is_theses_board_member(user):
             raise exceptions.NotFound()
 
         theses = Thesis.rest_objects.get_queryset().filter_by_type(
-            requested_type,
+            requested_type, user
         ).filter_by_user(user)
 
         if requested_only_mine:

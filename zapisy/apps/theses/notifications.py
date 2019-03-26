@@ -24,8 +24,8 @@ def notify_thesis_accepted(thesis: 'Thesis'):
     recipients = []
     if thesis.advisor:
         recipients.append(thesis.advisor.user.email)
-    if thesis.auxiliary_advisor:
-        recipients.append(thesis.auxiliary_advisor.user.email)
+    if thesis.supporting_advisor:
+        recipients.append(thesis.supporting_advisor.user.email)
     if recipients:
         formatted_body = ACCEPTED_BODY.format(thesis.title)
         send_mail(ACCEPTED_SUBJECT, formatted_body, settings.MASS_MAIL_FROM, recipients)
@@ -38,8 +38,8 @@ def notify_thesis_rejected(thesis: 'Thesis'):
     recipients = []
     if thesis.advisor:
         recipients.append(thesis.advisor.user.email)
-    if thesis.auxiliary_advisor:
-        recipients.append(thesis.auxiliary_advisor.user.email)
+    if thesis.supporting_advisor:
+        recipients.append(thesis.supporting_advisor.user.email)
     formatted_body = REJECTED_BODY.format(thesis.title, thesis.rejection_reason)
     rejecter = get_master_rejecter()
     msg = EmailMessage(

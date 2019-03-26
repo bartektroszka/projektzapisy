@@ -6,7 +6,7 @@ from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 
-from apps.users.models import Employee, Student, BaseUser
+from apps.users.models import Employee, Student
 from .validators import validate_num_required_votes, validate_master_rejecter
 from .system_settings import get_num_required_votes
 from .users import is_theses_admin

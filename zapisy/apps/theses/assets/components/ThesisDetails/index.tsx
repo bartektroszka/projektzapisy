@@ -206,7 +206,10 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	}
 
 	private shouldRenderRejectButton() {
-		return canChangeStatusTo(this.props.original, ThesisStatus.ReturnedForCorrections);
+		return (
+			this.props.mode === ThesisWorkMode.Editing &&
+			canChangeStatusTo(this.props.original, ThesisStatus.ReturnedForCorrections)
+		);
 	}
 
 	private renderRejectButton() {

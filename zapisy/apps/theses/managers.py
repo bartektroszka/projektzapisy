@@ -51,13 +51,9 @@ class APIQueryset(models.QuerySet):
         elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS_OR_ENGINEERS:
             return self.filter(kind__in=BACHELORS_OR_ENGINEERS_KINDS).filter_only_available()
         elif thesis_type == ThesisTypeFilter.AVAILABLE_ISIM:
-<<<<<<< HEAD
             return self.filter(kind__in=ISIM_KINDS).filter_only_available()
-=======
-            return self.filter_only_available(self.filter(kind__in=ISIM_KINDS))
         elif thesis_type == ThesisTypeFilter.UNGRADED:
             return self.filter_only_ungraded(user)
->>>>>>> Add vote-related backend & frontend code
         # Should never get here
         return self
 

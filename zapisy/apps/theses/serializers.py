@@ -68,7 +68,7 @@ class ThesesPersonSerializer(serializers.Serializer):
 
 def can_vote_be_set_for(voter: Employee, thesis: Optional[Thesis]):
     return (
-        is_theses_board_member(voter) or
+        is_theses_board_member(voter.user) or
         # Changing the value of an existing vote is always legal (assuming correct permissions)
         # even if the user is no longer a member of the theses board
         thesis and thesis.votes.filter(voter=voter).count()
@@ -129,7 +129,7 @@ def check_votes_permissions(user: User, votes: List, thesis: Optional[Thesis]):
     if thesis and not can_change_vote_for_thesis(user, thesis):
         raise exceptions.PermissionDenied(f'this user is not permitted to change vote(s) for thesis {thesis}')
     for vote in votes:
-        if not can_cast_vote_as_user(user, vote.voter):
+        if not can_cast_vote_as_user(user, vote.voter.user):
             raise exceptions.PermissionDenied(f'user {user} cannot change the vote of {vote.voter}')
 
 
@@ -168,6 +168,13 @@ class ThesisSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(choices=[(c.value, c.display) for c in ThesisStatus])
     kind = serializers.ChoiceField(choices=[(c.value, c.display) for c in ThesisKind])
 
+    def get_students(self, instance: Thesis):
+        """DRF will, by default, order this according to the ordering of the Student table;
+        we want to order by ID as defined in the through relation table
+        see: https://stackoverflow.com/q/48247490
+        """
+        return ThesesPersonSerializer(instance.get_students(), many=True).data
+
     def to_internal_value(self, data):
         result = super().to_internal_value(data)
         if 'votes' in data:
@@ -180,9 +187,10 @@ class ThesisSerializer(serializers.ModelSerializer):
         result = super().to_representation(instance)
         is_rejected = ThesisStatus(instance.status) == ThesisStatus.RETURNED_FOR_CORRECTIONS
         is_staff = self.context["is_staff"]
+        is_employee = self.context["is_employee"]
         if (
             is_rejected and
-            can_see_thesis_rejection_reason(instance, is_staff, self.context["user"])
+            can_see_thesis_rejection_reason(instance, is_staff, is_employee, self.context["user"])
         ):
             result["reason"] = instance.rejection_reason
         if can_see_thesis_votes(is_staff):
@@ -231,9 +239,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             reserved_until=validated_data.get("reserved_until"),
             description=validated_data.get("description", ""),
             advisor=validated_data.get("advisor"),
-            supporting_advisor=validated_data.get("auxiliary_advisor"),
-            student=validated_data.get("student"),
-            student_2=validated_data.get("student_2"),
+            supporting_advisor=validated_data.get("supporting_advisor"),
             rejection_reason=validated_data.get("reason")
             if status == ThesisStatus.RETURNED_FOR_CORRECTIONS else "",
         )

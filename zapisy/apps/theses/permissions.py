@@ -123,7 +123,7 @@ def can_see_thesis_rejection_reason(
     """
     return (
         is_staff or
-        is_employee and (thesis.advisor == user.employee or thesis.auxiliary_advisor == user.employee)
+        is_employee and (thesis.advisor == user.employee or thesis.supporting_advisor == user.employee)
     )
 
 
