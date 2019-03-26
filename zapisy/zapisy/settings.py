@@ -2,6 +2,11 @@ import os
 import logging
 import environ
 from django.contrib.messages import constants as messages
+from choicesenum.patches import patch_json
+
+# Serialization support for ChoicesEnum instances,
+# see https://github.com/loggi/python-choicesenum#JSON
+patch_json()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
