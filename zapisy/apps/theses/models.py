@@ -3,10 +3,19 @@ from datetime import datetime
 from choicesenum import ChoicesEnum
 from choicesenum.django.fields import EnumIntegerField
 from django.db import models
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 
 from apps.users.models import Employee, Student
 
 MAX_THESIS_TITLE_LEN = 300
+
+
+class MyEnumIntegerField(EnumIntegerField):
+    def to_python(self, value):
+        if isinstance(value, str):
+            value = int(value)
+        return super().to_python(value)
 
 
 class ThesisKind(ChoicesEnum):
@@ -64,14 +73,14 @@ class Thesis(models.Model):
         Employee, on_delete=models.PROTECT, blank=True, null=True,
         related_name='thesis_supporting_advisor'
     )
-    kind = EnumIntegerField(enum=ThesisKind, default=ThesisKind.MASTERS)
-    status = EnumIntegerField(enum=ThesisStatus, default=ThesisStatus.BEING_EVALUATED)
+    kind = MyEnumIntegerField(enum=ThesisKind, default=ThesisKind.MASTERS)
+    status = MyEnumIntegerField(enum=ThesisStatus, default=ThesisStatus.BEING_EVALUATED)
     # How long the assigned student(s) has/have to complete their work on this thesis
     # Note that this is only a convenience field for the users, the system
     # does not enforce this in any way
     reserved_until = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True)
-    students = models.ManyToManyField(Student)
+    students = models.ManyToManyField(Student, blank=True)
     added = models.DateTimeField(auto_now_add=True)
     # A thesis is _modified_ when its status changes
     modified = models.DateTimeField(auto_now_add=True)
@@ -84,7 +93,7 @@ class Thesis(models.Model):
     you should annotate each object instead.
     """
     def has_any_students_assigned(self):
-        return self.students.all.exists()
+        return self.students.all().exists()
 
     def __str__(self) -> str:
         return self.title
@@ -104,16 +113,24 @@ class Thesis(models.Model):
             self.status = ThesisStatus.IN_PROGRESS
         elif current_status == ThesisStatus.IN_PROGRESS and not has_students:
             self.status = ThesisStatus.ACCEPTED
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        self._adjust_status()
         if self.status != self.__original_status:
             # If the status changed, update modified date
             self.modified = datetime.now()
+            self.__original_status = self.status
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        skip = kwargs.pop("skip_status_update", False)
+        if self.id and not skip:
+            self._adjust_status()
         super().save(*args, **kwargs)
-        self.__original_status = self.status
-
+        
     class Meta:
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
+
+@receiver(m2m_changed, sender=Thesis.students.through)
+def thesis_students_changed(sender, **kwargs):
+    instance = kwargs["instance"]
+    instance._adjust_status()
+    instance.save(skip_status_update=True)

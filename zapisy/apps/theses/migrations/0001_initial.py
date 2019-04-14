@@ -20,15 +20,15 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=300, unique=True)),
-                ('kind', choicesenum.django.fields.EnumIntegerField(default=apps.theses.models.ThesisKind(0), enum=apps.theses.models.ThesisKind)),
-                ('status', choicesenum.django.fields.EnumIntegerField(default=apps.theses.models.ThesisStatus(1), enum=apps.theses.models.ThesisStatus)),
+                ('kind', apps.theses.models.MyEnumIntegerField(default=apps.theses.models.ThesisKind(0), enum=apps.theses.models.ThesisKind)),
+                ('status', apps.theses.models.MyEnumIntegerField(default=apps.theses.models.ThesisStatus(1), enum=apps.theses.models.ThesisStatus)),
                 ('reserved_until', models.DateField(blank=True, null=True)),
                 ('description', models.TextField(blank=True)),
                 ('added', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now_add=True)),
                 ('advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_advisor', to='users.Employee')),
                 ('supporting_advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_supporting_advisor', to='users.Employee')),
-                ('student', models.ManyToManyField(to='users.Student'))
+                ('students', models.ManyToManyField(blank=True, to='users.Student'))
             ],
             options={
                 'verbose_name': 'praca dyplomowa',

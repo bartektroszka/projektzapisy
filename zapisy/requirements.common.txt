@@ -2,7 +2,7 @@ Django~=2.1.0
 django-bootstrap-pagination==1.7.0
 django-cas-ng==3.6.0
 django-crispy-forms==1.7.2
-choicesenum==0.4
+choicesenum==0.5.3
 django-environ==0.4.4
 django-extensions==2.0.7
 django-filter==2.1.0
