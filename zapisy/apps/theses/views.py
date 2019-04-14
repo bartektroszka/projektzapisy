@@ -103,10 +103,10 @@ def generate_base_queryset() -> QuerySet:
     as well as user names annotated for further processing - sorting/filtering
     """
     return Thesis.objects.select_related(
-        *fields_for_prefetching("student"),
-        *fields_for_prefetching("student_2"),
         *fields_for_prefetching("advisor"),
-        *fields_for_prefetching("auxiliary_advisor"),
+        *fields_for_prefetching("supporting_advisor"),
+    ).prefetch_related(
+        "students"
     ).annotate(
         _advisor_name=Concat(
             "advisor__user__first_name", Value(" "), "advisor__user__last_name"
@@ -227,8 +227,8 @@ def filter_theses_queryset_for_type(qs: QuerySet, thesis_type: ThesisTypeFilter)
 def filter_theses_queryset_for_only_mine(qs: QuerySet, user: BaseUser):
     user_type = get_user_type(user)
     if user_type == ThesisUserType.STUDENT:
-        return qs.filter(Q(student=user) | Q(student_2=user))
-    return qs.filter(Q(advisor=user) | Q(auxiliary_advisor=user))
+        return qs.filter(students__in=[user])
+    return qs.filter(Q(advisor=user) | Q(supporting_advisor=user))
 
 
 NOT_READY_STATUSES = (

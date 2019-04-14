@@ -75,11 +75,8 @@ def check_advisor_permissions(user: BaseUser, advisor: Employee):
 
 
 class ThesisSerializer(serializers.ModelSerializer):
-    student = ThesesPersonSerializer(
-        allow_null=True, required=False, queryset=Student.objects.all()
-    )
-    student_2 = ThesesPersonSerializer(
-        allow_null=True, required=False, queryset=Student.objects.all()
+    students = ThesesPersonSerializer(
+        allow_null=True, required=False, queryset=Student.objects.all(), many=True
     )
     modified = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
 
@@ -115,9 +112,8 @@ class ThesisSerializer(serializers.ModelSerializer):
             reserved_until=validated_data.get("reserved_until"),
             description=validated_data.get("description", ""),
             advisor=validated_data.get("advisor"),
-            auxiliary_advisor=validated_data.get("auxiliary_advisor"),
-            student=validated_data.get("student"),
-            student_2=validated_data.get("student_2"),
+            supporting_advisor=validated_data.get("supporting_advisor"),
+            students=validated_data.get("students"),
         )
 
     def update(self, instance: Thesis, validated_data: GenericDict):
@@ -141,11 +137,10 @@ class ThesisSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get("description", instance.description)
         instance.status = validated_data.get("status", instance.status)
         instance.advisor = validated_data.get("advisor", instance.advisor)
-        instance.auxiliary_advisor = validated_data.get(
-            "auxiliary_advisor", instance.auxiliary_advisor
+        instance.supporting_advisor = validated_data.get(
+            "supporting_advisor", instance.supporting_advisor
         )
-        instance.student = validated_data.get("student", instance.student)
-        instance.student_2 = validated_data.get("student_2", instance.student_2)
+        instance.students.set(validated_data.get("students", instance.students))
         instance.save()
         return instance
 
@@ -153,9 +148,9 @@ class ThesisSerializer(serializers.ModelSerializer):
         model = Thesis
         read_only_fields = ("id",)
         fields = (
-            "id", "title", "advisor", "auxiliary_advisor",
+            "id", "title", "advisor", "supporting_advisor",
             "kind", "reserved_until", "description", "status",
-            "student", "student_2", "modified",
+            "students", "modified",
         )
         extra_kwargs = {
             "reserved_until": {
@@ -166,7 +161,7 @@ class ThesisSerializer(serializers.ModelSerializer):
                 "required": False,
                 "allow_null": True
             },
-            "auxiliary_advisor": {
+            "supporting_advisor": {
                 "required": False,
                 "allow_null": True
             }

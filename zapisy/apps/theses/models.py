@@ -54,32 +54,37 @@ class Thesis(models.Model):
         self.__original_status = self.status
 
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
+    # the related_name's below are necessary because we have multiple foreign keys pointing
+    # to the same model and Django isn't smart enough to generate unique reverse accessors
     advisor = models.ForeignKey(
-        Employee, on_delete=models.PROTECT, blank=True, null=True, related_name="thesis_advisor",
+        Employee, on_delete=models.PROTECT, blank=True, null=True,
+        related_name='thesis_advisor'
     )
-    auxiliary_advisor = models.ForeignKey(
-        Employee, on_delete=models.PROTECT, blank=True,
-        null=True, related_name="thesis_auxiliary_advisor",
+    supporting_advisor = models.ForeignKey(
+        Employee, on_delete=models.PROTECT, blank=True, null=True,
+        related_name='thesis_supporting_advisor'
     )
     kind = EnumIntegerField(enum=ThesisKind, default=ThesisKind.MASTERS)
     status = EnumIntegerField(enum=ThesisStatus, default=ThesisStatus.BEING_EVALUATED)
-    # How long the assigned student has to complete their work on this thesis
+    # How long the assigned student(s) has/have to complete their work on this thesis
     # Note that this is only a convenience field for the users, the system
     # does not enforce this in any way
     reserved_until = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True)
-    student = models.ForeignKey(
-        Student, on_delete=models.PROTECT, blank=True, null=True, related_name="thesis_student",
-    )
-    student_2 = models.ForeignKey(
-        Student, on_delete=models.PROTECT, blank=True, null=True, related_name="thesis_student_2",
-    )
+    students = models.ManyToManyField(Student)
     added = models.DateTimeField(auto_now_add=True)
     # A thesis is _modified_ when its status changes
     modified = models.DateTimeField(auto_now_add=True)
 
     def is_archived(self):
         return self.status == ThesisStatus.DEFENDED
+
+    """Check if this thesis has any students assigned.
+    NOTICE: this will query the DB. For processing multiple theses,
+    you should annotate each object instead.
+    """
+    def has_any_students_assigned(self):
+        return self.students.all.exists()
 
     def __str__(self) -> str:
         return self.title
@@ -94,9 +99,10 @@ class Thesis(models.Model):
         have been removed, go back to accepted
         """
         current_status = ThesisStatus(self.status)
-        if current_status == ThesisStatus.ACCEPTED and (self.student or self.student_2):
+        has_students = self.has_any_students_assigned()
+        if current_status == ThesisStatus.ACCEPTED and has_students:
             self.status = ThesisStatus.IN_PROGRESS
-        elif current_status == ThesisStatus.IN_PROGRESS and not self.student and not self.student_2:
+        elif current_status == ThesisStatus.IN_PROGRESS and not has_students:
             self.status = ThesisStatus.ACCEPTED
 
     def save(self, *args, **kwargs):

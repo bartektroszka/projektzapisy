@@ -27,9 +27,8 @@ class Migration(migrations.Migration):
                 ('added', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now_add=True)),
                 ('advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_advisor', to='users.Employee')),
-                ('auxiliary_advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_auxiliary_advisor', to='users.Employee')),
-                ('student', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_student', to='users.Student')),
-                ('student_2', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_student_2', to='users.Student')),
+                ('supporting_advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_supporting_advisor', to='users.Employee')),
+                ('student', models.ManyToManyField(to='users.Student'))
             ],
             options={
                 'verbose_name': 'praca dyplomowa',
