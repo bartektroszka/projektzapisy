@@ -7,20 +7,11 @@ router = routers.DefaultRouter()
 router.register("theses", views.ThesesViewSet, base_name="theses")
 router.register("theses_board", views.ThesesBoardViewSet, base_name="theses_board")
 router.register("theses_employees", views.EmployeesViewSet, base_name="theses_employees")
+router.register("theses_ac_students", views.StudentAutocomplete, base_name="theses_ac_students")
+router.register("theses_ac_employees", views.EmployeeAutocomplete, base_name="theses_ac_employees")
 
 urlpatterns = [
     url(r"^$", views.theses_main, name="main"),
-    # for django-autocomplete-light (admin widgets; see forms.py)
-    url(
-        r"^api/student-autocomplete/$",
-        views.StudentAutocomplete.as_view(),
-        name="student-autocomplete",
-    ),
-    url(
-        r"^api/employee-autocomplete/$",
-        views.EmployeeAutocomplete.as_view(),
-        name="employee-autocomplete",
-    ),
     url(r"^api/current_user/$", views.get_current_user, name="current_user"),
     url(r"^api/", include(router.urls))
 ]

@@ -9,8 +9,7 @@ from django.core.exceptions import PermissionDenied
 from rest_framework import viewsets, permissions, exceptions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.pagination import LimitOffsetPagination
-from dal import autocomplete
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 
 from apps.users.models import Student, Employee, BaseUser, wrap_user
 from .models import Thesis, ThesisStatus, ThesisKind
@@ -279,14 +278,19 @@ def theses_main(request):
     return render(request, "theses/main.html")
 
 
+class PersonAutocompletePagination(PageNumberPagination):
+    page_size = 15
+
+
 def build_autocomplete_view_with_queryset(queryset):
-    """Given a queryset, build an autocomplete view for django-autocomplete-light
-    (forms.py explains why we use it)
-    """
-    class ac(autocomplete.Select2QuerySetView):
+    """Given a queryset, build an autocomplete view for use by the frontend"""
+    class PersonAutocompleteViewset(viewsets.ModelViewSet):
+        http_method_names = ["get"]
+        permission_classes = (permissions.IsAuthenticated, )
+        serializer_class = serializers.ThesesPersonSerializer
+        pagination_class = PersonAutocompletePagination
+
         def get_queryset(self):
-            if not self.request.user.is_authenticated:
-                raise PermissionDenied()
             qs = queryset.objects.select_related(
                 "user"
             ).annotate(
@@ -294,14 +298,11 @@ def build_autocomplete_view_with_queryset(queryset):
                     "user__first_name", Value(" "), "user__last_name"
                 )
             ).order_by("_full_name")
-            if self.q:
-                qs = qs.filter(_full_name__icontains=self.q)
+            name_filter = self.request.query_params.get("filter", "").strip()
+            if name_filter:
+                qs = qs.filter(_full_name__icontains=name_filter)
             return qs.all()
-
-        def get_result_label(self, result):
-            """Define how to stringify results; for Employees we want their full name with title"""
-            return get_theses_user_full_name(result)
-    return ac
+    return PersonAutocompleteViewset
 
 
 StudentAutocomplete = build_autocomplete_view_with_queryset(Student)
