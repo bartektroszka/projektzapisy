@@ -12,6 +12,16 @@ MAX_THESIS_TITLE_LEN = 300
 
 
 class MyEnumIntegerField(EnumIntegerField):
+    """In choicesenum/django/fields.py, class EnumFieldMixin,
+    the author defines a `to_python` method that in the case of IntegerFields
+    only works with ints. This is in violation of Django's API:
+    https://docs.djangoproject.com/en/2.2/howto/custom-model-fields/#converting-values-to-python-objects
+    the docs clearly state that `to_python` "should deal gracefully with strings", and indeed,
+    when using the admin interface, the values passed here will be (numeric) strings,
+    and so errors will be thrown when validating those model fields (because the enum conversion
+    function only accepts ints);
+    this simple patch prevents that
+    """
     def to_python(self, value):
         if isinstance(value, str):
             value = int(value)
