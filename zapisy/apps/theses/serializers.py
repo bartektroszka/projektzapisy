@@ -75,9 +75,7 @@ def check_advisor_permissions(user: BaseUser, advisor: Employee):
 
 
 class ThesisSerializer(serializers.ModelSerializer):
-    students = ThesesPersonSerializer(
-        allow_null=True, required=False, queryset=Student.objects.all(), many=True
-    )
+    students = ThesesPersonSerializer(queryset=Student.objects.all(), many=True)
     modified = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
 
     # We need to define this field here manually to disable DRF's unique validator which
@@ -105,7 +103,7 @@ class ThesisSerializer(serializers.ModelSerializer):
         if not can_set_status_for_new(user, ThesisStatus(status)):
             raise exceptions.PermissionDenied(f'This type of user cannot set status to {status}')
 
-        return Thesis.objects.create(
+        result = Thesis.objects.create(
             title=validated_data.get("title"),
             kind=validated_data.get("kind"),
             status=validated_data.get("status"),
@@ -113,8 +111,9 @@ class ThesisSerializer(serializers.ModelSerializer):
             description=validated_data.get("description", ""),
             advisor=validated_data.get("advisor"),
             supporting_advisor=validated_data.get("supporting_advisor"),
-            students=validated_data.get("students"),
         )
+        result.students.set(validated_data.get("students"))
+        return result
 
     def update(self, instance: Thesis, validated_data: GenericDict):
         """Called in response to a successfully validated PATCH request"""
