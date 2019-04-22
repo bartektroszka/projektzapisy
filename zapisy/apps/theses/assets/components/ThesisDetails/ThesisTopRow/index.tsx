@@ -22,11 +22,13 @@ const TopRowContainer = styled.div`
 	justify-content: space-between;
 	width: 100%;
 	margin-bottom: 25px;
+	flex-wrap: wrap;
 `;
 
 const ElementWrapper = styled.div`
 	display: flex;
 	align-items: center;
+	height: 35px;
 `;
 
 const DATE_UPDATED_WIDTH = 150;

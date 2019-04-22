@@ -18,25 +18,18 @@ type Props = {
  * used by more specific components
  */
 export const InputWithLabel = React.memo(function(props: Props) {
-	return <table>
-		<tbody>
-			<tr>
-				<td style={{ paddingRight: "5px" }}>
-					<span>{props.labelText}</span>
-				</td>
-				<td>
-				<input
-					type={"text"}
-					value={props.inputText}
-					style={{
-						width: props.inputWidth != null ? props.inputWidth : "auto",
-						paddingLeft: "5px",
-					}}
-					readOnly={props.inputType === InputType.ReadOnly}
-					disabled={props.inputType === InputType.Disabled}
-				/>
-				</td>
-			</tr>
-		</tbody>
-	</table>;
+	return <div>
+		<span>{props.labelText}</span>
+		<input
+			type={"text"}
+			value={props.inputText}
+			style={{
+				width: props.inputWidth != null ? props.inputWidth : "auto",
+				paddingLeft: "2px",
+				marginLeft: "5px",
+			}}
+			readOnly={props.inputType === InputType.ReadOnly}
+			disabled={props.inputType === InputType.Disabled}
+		/>
+	</div>
 });

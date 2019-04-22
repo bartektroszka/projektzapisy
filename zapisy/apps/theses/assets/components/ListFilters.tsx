@@ -43,9 +43,14 @@ type Props = {
 	stringFilterBeingChanged: StringFilter;
 };
 
+const ItemContainer = styled.div`
+	height: 35px;
+	align-items: center;
+`;
+
 const TextFilterField = styled.input`
 	margin-left: 5px;
-	width: 150px;
+	width: auto;
 `;
 
 const labelStyle: React.CSSProperties = {
@@ -67,10 +72,11 @@ const OnlyMineCheckbox = styled.input`
 `;
 
 const FiltersContainer = styled.div`
-	width: 100%;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	flex-wrap: wrap;
+	flex-grow: 0.6;
 `;
 
 export class ListFilters extends React.PureComponent<Props> {
@@ -100,16 +106,16 @@ export class ListFilters extends React.PureComponent<Props> {
 		}
 		const isNormalState = state === ApplicationState.Normal;
 		return <FiltersContainer>
-			<GenericSelect<ThesisTypeFilter>
+			<ItemContainer><GenericSelect<ThesisTypeFilter>
 				value={this.props.typeValue}
 				onChange={this.handleTypeChange}
 				optionInfo={typeFilters}
 				label={"Rodzaj"}
 				labelCss={labelStyle}
 				enabled={isNormalState}
-			/>
+			/></ItemContainer>
 
-			<div>
+			<ItemContainer>
 				<span style={labelStyle}>Tytuł</span>
 				<TextFilterField
 					type="text"
@@ -117,9 +123,9 @@ export class ListFilters extends React.PureComponent<Props> {
 					onChange={this.handleTitleChanged}
 					disabled={!(isNormalState || stringFilterBeingChanged === "title")}
 				/>
-			</div>
+			</ItemContainer>
 
-			<div>
+			<ItemContainer>
 				<span style={labelStyle}>Promotor</span>
 				<TextFilterField
 					type="text"
@@ -127,8 +133,9 @@ export class ListFilters extends React.PureComponent<Props> {
 					onChange={this.handleAdvisorChanged}
 					disabled={!(isNormalState || stringFilterBeingChanged === "advisor")}
 				/>
-			</div>
+			</ItemContainer>
 
+			<ItemContainer>
 			<OnlyMineContainer>
 				<OnlyMineCheckbox
 					type="checkbox"
@@ -138,6 +145,7 @@ export class ListFilters extends React.PureComponent<Props> {
 				/>
 				<span style={labelStyle}>Tylko moje</span>
 			</OnlyMineContainer>
-		</FiltersContainer>;
+			</ItemContainer>
+		</FiltersContainer>
 	}
 }

@@ -28,7 +28,7 @@ const ActionButton = React.memo(Button.extend`
 	&:disabled {
 		color: grey;
 		cursor: default;
-	}../Dialogs/Dialogs
+	}
 	min-height: initial;
 	height: 25px;
 `);
@@ -44,19 +44,20 @@ const MainDetailsContainer = styled.div`
 	padding: 15px;
 	display: flex;
 	flex-direction: row;
+	box-sizing: content-box;
 	width: 100%;
+	flex-wrap: wrap;
 `;
 
 const LeftDetailsContainer = styled.div`
-	width: 790px;
+	flex-grow: 1;
+	margin-right: 20px;
 `;
 
 const RightDetailsContainer = styled.div`
-	width: 100px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	margin-left: 20px;
 `;
 
 const ButtonsContainer = styled.div`
