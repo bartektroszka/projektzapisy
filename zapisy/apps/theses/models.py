@@ -127,17 +127,18 @@ class Thesis(models.Model):
             # If the status changed, update modified date
             self.modified = datetime.now()
             self.__original_status = self.status
-    
+
     def save(self, *args, **kwargs):
         self.full_clean()
         skip = kwargs.pop("skip_status_update", False)
         if self.id and not skip:
             self._adjust_status()
         super().save(*args, **kwargs)
-        
+
     class Meta:
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
+
 
 @receiver(m2m_changed, sender=Thesis.students.through)
 def thesis_students_changed(sender, **kwargs):
