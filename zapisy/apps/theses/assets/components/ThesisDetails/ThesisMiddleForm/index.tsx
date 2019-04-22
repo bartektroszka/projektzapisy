@@ -39,7 +39,7 @@ const OptionalFieldLabel = React.memo(styled.span`
 `);
 
 type State = {
-	displayAuxAdvisor: boolean;
+	displaySuppAdvisor: boolean;
 	displayAuxStudent: boolean;
 };
 
@@ -51,7 +51,7 @@ type Props = {
 	onTitleChanged: (nt: string) => void;
 	onKindChanged: (nk: ThesisKind) => void;
 	onAdvisorChanged: (na: Employee | null) => void;
-	onAuxAdvisorChanged: (na: Employee | null) => void;
+	onSuppAdvisorChanged: (na: Employee | null) => void;
 	onStudentChanged: (na: Student | null) => void;
 	onSecondStudentChanged: (na: Student | null) => void;
 	onDescriptionChanged: (nd: string) => void;
@@ -60,7 +60,7 @@ type Props = {
 /** Decide whether to display the fields based on the thesis instance in the props */
 function getStateFromProps(props: Props) {
 	return {
-		displayAuxAdvisor: props.thesis.auxiliaryAdvisor !== null,
+		displaySuppAdvisor: props.thesis.supportingAdvisor !== null,
 		displayAuxStudent: props.thesis.secondStudent !== null,
 	};
 }
@@ -81,11 +81,11 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 		this.props.onDescriptionChanged(e.target.value);
 	}
 
-	private triggerAuxAdvVisibility = () => {
-		const newValue = !this.state.displayAuxAdvisor;
-		this.setState({ displayAuxAdvisor: newValue });
+	private triggerSuppAdvVisibility = () => {
+		const newValue = !this.state.displaySuppAdvisor;
+		this.setState({ displaySuppAdvisor: newValue });
 		if (!newValue) {
-			this.props.onAuxAdvisorChanged(null);
+			this.props.onSuppAdvisorChanged(null);
 		}
 	}
 
@@ -165,21 +165,21 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 					{ readOnly
 						? null
 						: <AddRemoveIcon
-							onClick={this.triggerAuxAdvVisibility}
-							type={this.state.displayAuxAdvisor ? IconType.Remove : IconType.Add}
+							onClick={this.triggerSuppAdvVisibility}
+							type={this.state.displaySuppAdvisor ? IconType.Remove : IconType.Add}
 						/>
 					}
 				</td>
 			</PersonTableRow>
-			{ this.state.displayAuxAdvisor ? (
+			{ this.state.displaySuppAdvisor ? (
 				<PersonTableRow>
 					<td><OptionalFieldLabel>Promotor wspomagający</OptionalFieldLabel></td>
 					<td>
 						<PersonField
 							personType={PersonType.Employee}
-							onChange={this.props.onAuxAdvisorChanged}
+							onChange={this.props.onSuppAdvisorChanged}
 							personConstructor={Employee}
-							value={this.props.thesis.auxiliaryAdvisor}
+							value={this.props.thesis.supportingAdvisor}
 							readOnly={readOnly}
 						/>
 					</td>
@@ -189,41 +189,30 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 	}
 
 	private renderStudents(readOnly: boolean) {
-		return <>
-			<PersonTableRow>
-				<td>Student</td>
-				<td>
-					<PersonField
-						personType={PersonType.Student}
-						onChange={this.props.onStudentChanged}
-						personConstructor={Student}
-						value={this.props.thesis.student}
-						readOnly={readOnly}
-					/>
-					{ readOnly
-						? null
-						: <AddRemoveIcon
-							onClick={this.triggerSecondStudentVisibility}
-							type={this.state.displayAuxStudent ? IconType.Remove : IconType.Add}
-						/>
-					}
-				</td>
-			</PersonTableRow>
-			{ this.state.displayAuxStudent ? (
+		const students = this.props.thesis.students;
+		return <>{
+			students.map((s, idx) =>
 				<PersonTableRow>
-					<td><OptionalFieldLabel>Student wspomagający</OptionalFieldLabel></td>
+					<td>{students.length > 1 ? `Student ${idx + 1}.` : "Student"}</td>
 					<td>
 						<PersonField
 							personType={PersonType.Student}
-							onChange={this.props.onSecondStudentChanged}
+							onChange={this.props.onStudentChanged}
 							personConstructor={Student}
-							value={this.props.thesis.secondStudent}
+							value={s}
 							readOnly={readOnly}
 						/>
+						{ readOnly
+							? null
+							: <AddRemoveIcon
+								onClick={this.triggerSecondStudentVisibility}
+								type={this.state.displayAuxStudent ? IconType.Remove : IconType.Add}
+							/>
+						}
 					</td>
 				</PersonTableRow>
-			) : null }
-		</>;
+			)
+		}</>;
 	}
 
 	private renderDescription(readOnly: boolean) {

@@ -17,13 +17,12 @@ export type ThesisInJson = {
 	id: number;
 	title: string;
 	advisor?: number;
-	auxiliary_advisor?: number;
+	supporting_advisor?: number;
 	kind: ThesisKind;
 	reserved_until: string | null;
 	description: string;
 	status: ThesisStatus;
-	student?: PersonInJson;
-	student_2?: PersonInJson;
+	students?: PersonInJson[];
 	modified_date: string;
 };
 
@@ -45,13 +44,12 @@ export function deserializeThesis(json: ThesisInJson) {
 	result.id = json.id;
 	result.title = json.title;
 	result.advisor = json.advisor ? Users.getEmployeeById(json.advisor) : null;
-	result.auxiliaryAdvisor = json.auxiliary_advisor ? Users.getEmployeeById(json.auxiliary_advisor) : null;
+	result.supportingAdvisor = json.supporting_advisor ? Users.getEmployeeById(json.supporting_advisor) : null;
 	result.kind = json.kind;
 	result.reservedUntil = json.reserved_until ? moment(json.reserved_until) : null;
 	result.description = json.description;
 	result.status = json.status;
-	result.student = json.student ? deserializeStudent(json.student) : null;
-	result.secondStudent = json.student_2 ? deserializeStudent(json.student_2) : null;
+	result.students = json.students ? json.students.map(deserializeStudent) : [];
 	result.modifiedDate = moment(json.modified_date);
 	return result;
 }

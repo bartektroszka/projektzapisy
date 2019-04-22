@@ -131,7 +131,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				onTitleChanged={this.onTitleChanged}
 				onKindChanged={this.onKindChanged}
 				onAdvisorChanged={this.onAdvisorChanged}
-				onAuxAdvisorChanged={this.onAuxAdvisorChanged}
+				onSuppAdvisorChanged={this.onSuppAdvisorChanged}
 				onStudentChanged={this.onStudentChanged}
 				onSecondStudentChanged={this.onSecondStudentChanged}
 				onDescriptionChanged={this.onDescriptionChanged}
@@ -260,8 +260,8 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		this.updateThesisState({ advisor: { $set: newAdvisor } });
 	}
 
-	private onAuxAdvisorChanged = (newAuxAdvisor: Employee | null): void => {
-		this.updateThesisState({ auxiliaryAdvisor: { $set: newAuxAdvisor } });
+	private onSuppAdvisorChanged = (newSuppAdvisor: Employee | null): void => {
+		this.updateThesisState({ supportingAdvisor: { $set: newSuppAdvisor } });
 	}
 
 	private onStudentChanged = (newStudent: Student | null): void => {

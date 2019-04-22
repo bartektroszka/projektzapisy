@@ -13,13 +13,12 @@ import { Moment } from "moment";
 type ThesisAddOutSerialized = {
 	title?: string;
 	advisor?: number | null;
-	auxiliary_advisor?: number | null;
+	supporting_advisor?: number | null;
 	kind?: ThesisKind;
 	reserved_until?: string | null;
 	description?: string;
 	status?: ThesisStatus;
-	student?: number | null;
-	student_2?: number | null;
+	students?: number[];
 };
 
 /**
@@ -40,18 +39,13 @@ export function serializeNewThesis(thesis: Thesis): ThesisAddOutSerialized {
 		kind: thesis.kind,
 		description: thesis.description,
 		status: thesis.status,
+		students: thesis.students.map(toPersonDispatch) as number[],
 	};
 	if (thesis.advisor) {
 		result.advisor = toPersonDispatch(thesis.advisor);
 	}
-	if (thesis.auxiliaryAdvisor) {
-		result.auxiliary_advisor = toPersonDispatch(thesis.auxiliaryAdvisor);
-	}
-	if (thesis.student) {
-		result.student = toPersonDispatch(thesis.student);
-	}
-	if (thesis.secondStudent) {
-		result.student_2 = toPersonDispatch(thesis.secondStudent);
+	if (thesis.supportingAdvisor) {
+		result.supporting_advisor = toPersonDispatch(thesis.supportingAdvisor);
 	}
 	if (thesis.reservedUntil) {
 		result.reserved_until = serializeReservationDate(thesis.reservedUntil);
@@ -93,14 +87,11 @@ export function serializeThesisDiff(orig: Thesis, mod: Thesis): ThesisModOutSeri
 	if (hadPersonChange(orig.advisor, mod.advisor)) {
 		result.advisor = toPersonDispatch(mod.advisor);
 	}
-	if (hadPersonChange(orig.auxiliaryAdvisor, mod.auxiliaryAdvisor)) {
-		result.auxiliary_advisor = toPersonDispatch(mod.auxiliaryAdvisor);
+	if (hadPersonChange(orig.supportingAdvisor, mod.supportingAdvisor)) {
+		result.supporting_advisor = toPersonDispatch(mod.supportingAdvisor);
 	}
-	if (hadPersonChange(orig.student, mod.student)) {
-		result.student = toPersonDispatch(mod.student);
-	}
-	if (hadPersonChange(orig.secondStudent, mod.secondStudent)) {
-		result.student_2 = toPersonDispatch(mod.secondStudent);
+	if (!orig.sameStudentsAs(mod)) {
+		result.students = mod.students.map(toPersonDispatch) as number[];
 	}
 	if (orig.kind !== mod.kind) {
 		result.kind = mod.kind;

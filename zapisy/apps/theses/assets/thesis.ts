@@ -16,13 +16,12 @@ export class Thesis {
 	public id: number;
 	public title: string;
 	public advisor: Employee | null;
-	public auxiliaryAdvisor: Employee | null;
+	public supportingAdvisor: Employee | null;
 	public kind: ThesisKind;
 	public reservedUntil: moment.Moment | null;
 	public description: string;
 	public status: ThesisStatus;
-	public student: Student | null;
-	public secondStudent: Student | null;
+	public students: Student[];
 	public modifiedDate: moment.Moment;
 
 	/** Construct a new thesis object with default values */
@@ -30,13 +29,12 @@ export class Thesis {
 		this.id = -1;
 		this.title = "";
 		this.advisor = null;
-		this.auxiliaryAdvisor = null;
+		this.supportingAdvisor = null;
 		this.kind = ThesisKind.Bachelors;
 		this.reservedUntil = null;
 		this.description = "";
 		this.status = ThesisStatus.BeingEvaluated;
-		this.student = null;
-		this.secondStudent = null;
+		this.students = [];
 		this.modifiedDate = moment();
 	}
 
@@ -71,14 +69,24 @@ export class Thesis {
 			this.title === other.title &&
 			this.description === other.description &&
 			nullableValuesEqual(this.advisor, other.advisor, personCompare) &&
-			nullableValuesEqual(this.auxiliaryAdvisor, other.auxiliaryAdvisor, personCompare) &&
-			nullableValuesEqual(this.student, other.student, personCompare) &&
-			nullableValuesEqual(this.secondStudent, other.secondStudent, personCompare) &&
+			nullableValuesEqual(this.supportingAdvisor, other.supportingAdvisor, personCompare) &&
+			this.sameStudentsAs(other) &&
 			this.kind === other.kind &&
 			this.isReservationDateSame(other.reservedUntil) &&
 			this.status === other.status &&
 			this.modifiedDate.isSame(other.modifiedDate)
 		);
+	}
+
+	public sameStudentsAs(other: Thesis) {
+		return (
+			this.students.length === other.students.length &&
+			this.students.every(s => other.hasStudentAssigned(s))
+		);
+	}
+
+	public hasStudentAssigned(student: Student): boolean {
+		return !!this.students.find(s => s.isEqual(student));
 	}
 
 	public isReservationDateSame(otherDate: moment.Moment | null) {
