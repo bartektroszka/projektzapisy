@@ -146,12 +146,10 @@ export type PersonAutcompleteResults = {
 	hasMore: boolean;
 };
 type PersonAutocompleteJson = {
-	pagination: {
-		more: boolean;
-	};
+	next: string | null;
 	results: Array<{
 		id: number;
-		text: string;
+		name: string;
 	}>;
 };
 /**
@@ -164,18 +162,18 @@ type PersonAutocompleteJson = {
 export async function getPersonAutocomplete(
 	person: PersonType, substr: string, pageNum: number,
 ): Promise<PersonAutcompleteResults> {
-	const personUrlPart = person === PersonType.Employee ? "employee" : "student";
-	const url = `${BASE_API_URL}/${personUrlPart}-autocomplete/`;
+	const personUrlPart = person === PersonType.Employee ? "employees" : "students";
+	const url = `${BASE_API_URL}/theses_ac_${personUrlPart}/`;
 	const acResults = await getData(url, { params: {
 		page: pageNum,
-		q: substr,
+		filter: substr,
 	}}) as PersonAutocompleteJson;
 	const constr = person === PersonType.Employee ? Employee : Student;
 	return {
 		results: acResults.results.map(
-			raw => new constr(raw.id, raw.text)
+			raw => new constr(raw.id, raw.name)
 		),
-		hasMore: acResults.pagination.more,
+		hasMore: !!acResults.next,
 	};
 }
 
