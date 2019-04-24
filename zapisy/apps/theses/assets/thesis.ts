@@ -21,7 +21,9 @@ export class Thesis {
 	public reservedUntil: moment.Moment | null;
 	public description: string;
 	public status: ThesisStatus;
-	public students: Student[];
+	// while the server will never send us null entries in the array,
+	// we may insert some when editing locally
+	public students: Array<Student | null>;
 	public modifiedDate: moment.Moment;
 
 	/** Construct a new thesis object with default values */
@@ -79,14 +81,24 @@ export class Thesis {
 	}
 
 	public sameStudentsAs(other: Thesis) {
+		const thisStudents = this.onlyDefinedStudents();
+		const otherStudents = other.onlyDefinedStudents();
 		return (
-			this.students.length === other.students.length &&
-			this.students.every(s => other.hasStudentAssigned(s))
+			thisStudents.length === otherStudents.length &&
+			thisStudents.every(s => other.hasStudentAssigned(s))
 		);
 	}
 
 	public hasStudentAssigned(student: Student): boolean {
-		return !!this.students.find(s => s.isEqual(student));
+		return !!this.students.find(s => !!s && s.isEqual(student));
+	}
+
+	public clearUndefinedStudents() {
+		this.students = this.onlyDefinedStudents();
+	}
+
+	private onlyDefinedStudents(): Student[] {
+		return this.students.filter(s => !!s) as Student[];
 	}
 
 	public isReservationDateSame(otherDate: moment.Moment | null) {

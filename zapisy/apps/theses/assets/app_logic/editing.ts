@@ -161,6 +161,7 @@ class C {
 			this.performPreSaveChecks();
 
 			const thesis = this.thesis!;
+			thesis.modified.clearUndefinedStudents();
 			const { workMode } = AppMode;
 
 			AppMode.applicationState = ApplicationState.Saving;

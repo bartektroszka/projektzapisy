@@ -40,7 +40,6 @@ const OptionalFieldLabel = React.memo(styled.span`
 
 type State = {
 	displaySuppAdvisor: boolean;
-	displayAuxStudent: boolean;
 };
 
 type Props = {
@@ -52,8 +51,9 @@ type Props = {
 	onKindChanged: (nk: ThesisKind) => void;
 	onAdvisorChanged: (na: Employee | null) => void;
 	onSuppAdvisorChanged: (na: Employee | null) => void;
-	onStudentChanged: (na: Student | null) => void;
-	onSecondStudentChanged: (na: Student | null) => void;
+	onAddStudents: (num: number) => void;
+	onStudentRemoved: (idx: number) => void;
+	onStudentChanged: (index: number, student: Student | null) => void;
 	onDescriptionChanged: (nd: string) => void;
 };
 
@@ -61,7 +61,6 @@ type Props = {
 function getStateFromProps(props: Props) {
 	return {
 		displaySuppAdvisor: props.thesis.supportingAdvisor !== null,
-		displayAuxStudent: props.thesis.secondStudent !== null,
 	};
 }
 
@@ -86,14 +85,6 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 		this.setState({ displaySuppAdvisor: newValue });
 		if (!newValue) {
 			this.props.onSuppAdvisorChanged(null);
-		}
-	}
-
-	private triggerSecondStudentVisibility = () => {
-		const newValue = !this.state.displayAuxStudent;
-		this.setState({ displayAuxStudent: newValue });
-		if (!newValue) {
-			this.props.onSecondStudentChanged(null);
 		}
 	}
 
@@ -162,11 +153,11 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 						value={this.props.thesis.advisor}
 						readOnly={readOnly || !canSetArbitraryAdvisor()}
 					/>
-					{ readOnly
+					{ readOnly || this.state.displaySuppAdvisor
 						? null
 						: <AddRemoveIcon
 							onClick={this.triggerSuppAdvVisibility}
-							type={this.state.displaySuppAdvisor ? IconType.Remove : IconType.Add}
+							type={IconType.Add}
 						/>
 					}
 				</td>
@@ -182,6 +173,13 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 							value={this.props.thesis.supportingAdvisor}
 							readOnly={readOnly}
 						/>
+						{ readOnly
+							? null
+							: <AddRemoveIcon
+								onClick={this.triggerSuppAdvVisibility}
+								type={IconType.Remove}
+							/>
+						}
 					</td>
 				</PersonTableRow>
 			) : null }
@@ -189,30 +187,62 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 	}
 
 	private renderStudents(readOnly: boolean) {
-		const students = this.props.thesis.students;
+		let students: Array<Student | null> = this.props.thesis.students;
+		if (!students.length) {
+			// if there are no students, pretend there is one field
+			// with no selection made
+			students = [null];
+		}
+		const len = students.length;
 		return <>{
 			students.map((s, idx) =>
-				<PersonTableRow>
-					<td>{students.length > 1 ? `Student ${idx + 1}.` : "Student"}</td>
+				<PersonTableRow key={`stud_${idx}`}>
+					<td>{len > 1 ? `Student ${idx + 1}.` : "Student"}</td>
 					<td>
 						<PersonField
 							personType={PersonType.Student}
-							onChange={this.props.onStudentChanged}
+							onChange={nv => this.onStudentChanged(idx, nv)}
 							personConstructor={Student}
 							value={s}
 							readOnly={readOnly}
 						/>
-						{ readOnly
-							? null
-							: <AddRemoveIcon
-								onClick={this.triggerSecondStudentVisibility}
-								type={this.state.displayAuxStudent ? IconType.Remove : IconType.Add}
+						{ !readOnly && idx !== 0
+							? <AddRemoveIcon
+								onClick={() => this.onStudentRemoved(idx)}
+								type={IconType.Remove}
 							/>
+							: null
+						}
+						{ !readOnly && idx === len - 1
+							? <AddRemoveIcon
+								onClick={() => this.onAddAnotherStudent()}
+								type={IconType.Add}
+							/>
+							: null
 						}
 					</td>
 				</PersonTableRow>
 			)
 		}</>;
+	}
+
+	private onAddAnotherStudent = () => {
+		if (!this.props.thesis.students.length) {
+			// if there actually aren't any students, we display it as one 'empty' student
+			// field, but the expected behavior would be to have two after clicking
+			// the button
+			this.props.onAddStudents(2);
+		} else {
+			this.props.onAddStudents(1);
+		}
+	}
+
+	private onStudentRemoved = (index: number) => {
+		this.props.onStudentRemoved(index);
+	}
+
+	private onStudentChanged = (index: number, student: Student | null) => {
+		this.props.onStudentChanged(index, student);
 	}
 
 	private renderDescription(readOnly: boolean) {

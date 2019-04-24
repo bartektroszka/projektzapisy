@@ -132,8 +132,9 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				onKindChanged={this.onKindChanged}
 				onAdvisorChanged={this.onAdvisorChanged}
 				onSuppAdvisorChanged={this.onSuppAdvisorChanged}
+				onAddStudents={this.onAddStudents}
+				onStudentRemoved={this.onStudentRemoved}
 				onStudentChanged={this.onStudentChanged}
-				onSecondStudentChanged={this.onSecondStudentChanged}
 				onDescriptionChanged={this.onDescriptionChanged}
 			/>
 		</>;
@@ -264,10 +265,9 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		this.updateThesisState({ supportingAdvisor: { $set: newSuppAdvisor } });
 	}
 
-	private onStudentChanged = (newStudent: Student | null): void => {
+	private updateStateWithStudentChange(update: object) {
 		// also update the reservation date, but only if they haven't touched it previously
 		const { original, thesis } = this.props;
-		const update = { student: { $set: newStudent } };
 		if (original.isReservationDateSame(thesis.reservedUntil)) {
 			const expires = moment().add(DEFAULT_THESIS_RESERVATION_YEARS, "years");
 			Object.assign(update, { reservedUntil: { $set: expires } });
@@ -275,8 +275,16 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		this.updateThesisState(update);
 	}
 
-	private onSecondStudentChanged = (newSecondStudent: Student | null): void => {
-		this.updateThesisState({ secondStudent: { $set: newSecondStudent } });
+	private onStudentChanged = (idx: number, student: Student | null) => {
+		this.updateStateWithStudentChange({ students: { $splice: [[idx, 1, student]] } });
+	}
+
+	private onStudentRemoved = (idx: number): void => {
+		this.updateStateWithStudentChange({ students: { $splice: [[idx, 1]] } });
+	}
+
+	private onAddStudents = (num: number) => {
+		this.updateThesisState({ students: { $push: Array(num).fill(null) } });
 	}
 
 	private onDescriptionChanged = (newDesc: string): void => {
