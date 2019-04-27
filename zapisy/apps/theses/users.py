@@ -29,13 +29,8 @@ def is_regular_employee(user: BaseUser):
 def get_theses_board():
     """Return all members of the theses board"""
     return Employee.objects.select_related(
-        "user"
+        'user'
     ).filter(user__groups__name=THESIS_BOARD_GROUP_NAME)
-
-
-def get_num_board_members() -> int:
-    """Return the number of theses board members"""
-    return len(get_theses_board())
 
 
 class ThesisUserType(Enum):

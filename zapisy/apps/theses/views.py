@@ -1,11 +1,8 @@
 from typing import List
 from enum import Enum
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 from django.db.models import Value, When, Case, BooleanField, QuerySet, Q
 from django.db.models.functions import Concat, Lower
-from django.core.exceptions import PermissionDenied
 from rest_framework import viewsets, permissions, exceptions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -17,8 +14,7 @@ from . import serializers
 from .drf_permission_classes import ThesisPermissions
 from .users import (
     get_theses_board, get_user_type,
-    get_theses_user_full_name, ThesisUserType,
-    is_student
+    ThesisUserType, is_student
 )
 
 """Names of processing parameters in query strings"""
@@ -63,7 +59,7 @@ class ThesesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ThesisSerializer
     pagination_class = ThesesPagination
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self):
         requested_thesis_type_str = self.request.query_params.get(THESIS_TYPE_FILTER_NAME, None)
 
         try:
@@ -251,7 +247,7 @@ class ThesesBoardViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
     serializer_class = serializers.ThesesBoardMemberSerializer
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self):
         return get_theses_board()
 
 
@@ -260,7 +256,7 @@ class EmployeesViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
     serializer_class = serializers.ThesesPersonSerializer
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self):
         return Employee.objects.select_related("user")
 
 
@@ -271,11 +267,6 @@ def get_current_user(request):
     wrapped_user = wrap_user(request.user)
     serializer = serializers.CurrentUserSerializer(wrapped_user)
     return Response(serializer.data)
-
-
-@login_required
-def theses_main(request):
-    return render(request, "theses/main.html")
 
 
 class PersonAutocompletePagination(PageNumberPagination):

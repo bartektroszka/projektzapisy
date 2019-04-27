@@ -1,4 +1,4 @@
-from django.conf.urls import url, include
+from django.urls import path, include
 from rest_framework import routers
 
 from . import views
@@ -11,7 +11,6 @@ router.register("theses_ac_students", views.StudentAutocomplete, base_name="thes
 router.register("theses_ac_employees", views.EmployeeAutocomplete, base_name="theses_ac_employees")
 
 urlpatterns = [
-    url(r"^$", views.theses_main, name="main"),
-    url(r"^api/current_user/$", views.get_current_user, name="current_user"),
-    url(r"^api/", include(router.urls))
+    path("api/current_user/", views.get_current_user, name="current_user"),
+    path("api/", include(router.urls))
 ]
