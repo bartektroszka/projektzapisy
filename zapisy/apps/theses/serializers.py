@@ -139,7 +139,8 @@ class ThesisSerializer(serializers.ModelSerializer):
         instance.supporting_advisor = validated_data.get(
             "supporting_advisor", instance.supporting_advisor
         )
-        instance.students.set(validated_data.get("students", instance.students))
+        if "students" in validated_data:
+            instance.students.set(validated_data.get("students"))
         instance.save()
         return instance
 
