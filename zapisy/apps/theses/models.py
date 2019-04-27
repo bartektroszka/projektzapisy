@@ -71,6 +71,8 @@ class Thesis(models.Model):
         # Save the status so that, when saving, we can determine whether or not it changed
         # See https://stackoverflow.com/a/1793323
         self.__original_status = self.status
+        # See get_students
+        self.__sort_criterion = "{}.id".format(Thesis.students.through._meta.db_table)
 
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
     # the related_name's below are necessary because we have multiple foreign keys pointing
@@ -104,6 +106,25 @@ class Thesis(models.Model):
     """
     def has_any_students_assigned(self):
         return self.students.all().exists()
+
+    def get_students(self):
+        """Get all the students assigned to this thesis in the proper order
+        (students.all() doesn't order them properly)
+        """
+        return self.students.order_by(self.__sort_criterion)
+
+    def set_students(self, students):
+        """Given an interable of students, assign them as to this thesis.
+        We don't use ManyToManyRelatedManager#set as it doesn't maintain the
+        order in which items are specified, which matters to us here
+        (the add() with multiple argument has the same problem - we need to execute
+        a query per student to ensure they're appended to the end of the table
+        in the order we want. In practice this is not a problem as we always have just a few
+        students per thesis at most)
+        """
+        self.students.clear()
+        for student in students:
+            self.students.add(student)
 
     def __str__(self) -> str:
         return self.title

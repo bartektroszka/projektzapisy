@@ -75,7 +75,9 @@ def check_advisor_permissions(user: BaseUser, advisor: Employee):
 
 
 class ThesisSerializer(serializers.ModelSerializer):
-    students = ThesesPersonSerializer(queryset=Student.objects.all(), many=True)
+    # This needs to be a method field rather than just a regular nested field
+    # as we want to control the order of students (see get_students)
+    students = serializers.SerializerMethodField()
     modified = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
 
     # We need to define this field here manually to disable DRF's unique validator which
@@ -85,6 +87,25 @@ class ThesisSerializer(serializers.ModelSerializer):
     # Instead of using DRF's validation we override field-level validation below
     # and manually check for uniqueness
     title = serializers.CharField(max_length=MAX_THESIS_TITLE_LEN)
+
+    def to_internal_value(self, data):
+        result = super().to_internal_value(data)
+        if "students" in data:
+            # I need to do this manually as DRF won't let me create writable method fields
+            students_serializer = ThesesPersonSerializer(
+                queryset=Student.objects.all(), data=data["students"], many=True
+            )
+            if not students_serializer.is_valid():
+                raise serializers.ValidationError("'students' should be an array of valid student IDs")
+            result["students"] = students_serializer.validated_data
+        return result
+
+    def get_students(self, instance: Thesis):
+        """DRF will, by default, order this according to the ordering of the Student table;
+        we want to order by ID as defined in the through relation table
+        see: https://stackoverflow.com/q/48247490
+        """
+        return ThesesPersonSerializer(instance.get_students(), many=True).data
 
     def validate_title(self, new_title: str):
         validate_new_title_for_instance(new_title, self.instance)
@@ -112,7 +133,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             advisor=validated_data.get("advisor"),
             supporting_advisor=validated_data.get("supporting_advisor"),
         )
-        result.students.set(validated_data.get("students"))
+        result.set_students(validated_data.get("students", []))
         return result
 
     def update(self, instance: Thesis, validated_data: GenericDict):
@@ -140,7 +161,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             "supporting_advisor", instance.supporting_advisor
         )
         if "students" in validated_data:
-            instance.students.set(validated_data.get("students"))
+            instance.set_students(validated_data.get("students"))
         instance.save()
         return instance
 
