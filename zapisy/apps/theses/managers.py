@@ -42,15 +42,15 @@ class APIQueryset(models.QuerySet):
         elif thesis_type == ThesisTypeFilter.ISIM:
             return self.filter(kind__in=ISIM_KINDS)
         elif thesis_type == ThesisTypeFilter.AVAILABLE_MASTERS:
-            return self.filter_only_available(self.filter(kind=ThesisKind.MASTERS))
+            return self.filter(kind=ThesisKind.MASTERS).filter_only_available()
         elif thesis_type == ThesisTypeFilter.AVAILABLE_ENGINEERS:
-            return self.filter_only_available(self.filter(kind__in=ENGINEERS_KINDS))
+            return self.filter(kind__in=ENGINEERS_KINDS).filter_only_available()
         elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS:
-            return self.filter_only_available(self.filter(kind__in=BACHELORS_KINDS))
+            return self.filter(kind__in=BACHELORS_KINDS).filter_only_available()
         elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS_OR_ENGINEERS:
-            return self.filter_only_available(self.filter(kind__in=BACHELORS_OR_ENGINEERS_KINDS))
+            return self.filter(kind__in=BACHELORS_OR_ENGINEERS_KINDS).filter_only_available()
         elif thesis_type == ThesisTypeFilter.AVAILABLE_ISIM:
-            return self.filter_only_available(self.filter(kind__in=ISIM_KINDS))
+            return self.filter(kind__in=ISIM_KINDS).filter_only_available()
         # Should never get here
         return self
 

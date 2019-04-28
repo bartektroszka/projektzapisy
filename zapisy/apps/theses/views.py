@@ -47,16 +47,16 @@ class ThesesViewSet(viewsets.ModelViewSet):
         requested_only_mine = self.request.query_params.get(
             ONLY_MINE_THESES_PARAM_NAME, "0"
         ) == "1"
-
         sort_column = self.request.query_params.get(THESIS_SORT_COLUMN_NAME, "")
         sort_dir = self.request.query_params.get(THESIS_SORT_DIR_NAME, "")
 
+        user = self.request.user
         theses = Thesis.rest_objects.get_queryset().filter_by_type(
-            requested_type
-        ).filter_by_user(self.request.user)
+            requested_type,
+        ).filter_by_user(user)
 
         if requested_only_mine:
-            theses = theses.filter_only_mine(self.request.user)
+            theses = theses.filter_only_mine(user)
         if requested_title:
             theses = theses.filter_by_title(requested_title)
         if requested_advisor_name:

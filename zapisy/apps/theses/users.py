@@ -37,11 +37,14 @@ def get_theses_board():
     ).filter(user__groups__name=THESIS_BOARD_GROUP_NAME)
 
 
-def get_theses_user_full_name(user: User):
+def get_theses_user_full_name(user: BaseUser):
     """Returns the full name of the user for use by the theses system.
     If the user is an Employee, `get_full_name_with_academic_title` will be used;
     otherwise, `get_full_name` will be used.
+    Accepts a BaseUser instance because this is only called by the person serializer,
+    and doing it this way is faster (no need to look up the employee/student instance
+    via FK)
     """
-    if BaseUser.is_employee(user):
-        return user.employee.get_full_name_with_academic_title()
+    if isinstance(user, Employee):
+        return user.get_full_name_with_academic_title()
     return user.get_full_name()

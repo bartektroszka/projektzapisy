@@ -39,7 +39,7 @@ class ThesesPersonSerializer(serializers.Serializer):
     def to_representation(self, instance: BaseUser):
         return {
             "id": instance.pk,
-            "name": get_theses_user_full_name(instance.user)
+            "name": get_theses_user_full_name(instance)
         }
 
     def to_internal_value(self, data):
@@ -199,7 +199,7 @@ class CurrentUserSerializer(serializers.ModelSerializer):
         return {
             # The ThesesPersonSerializer needs to work with BaseUser instances,
             # because it's used for serializing thesis person
-            "user": ThesesPersonSerializer(CurrentUserSerializer._to_base_person(instance)),
+            "user": ThesesPersonSerializer(CurrentUserSerializer._to_base_person(instance)).data,
             "type": CurrentUserSerializer._serialize_user_type(instance).value,
         }
 
