@@ -42,17 +42,24 @@ class APIQueryset(models.QuerySet):
         elif thesis_type == ThesisTypeFilter.ISIM:
             return self.filter(kind__in=ISIM_KINDS)
         elif thesis_type == ThesisTypeFilter.AVAILABLE_MASTERS:
-            return self.available_thesis_filter(self.filter(kind=ThesisKind.MASTERS))
+            return self.filter_only_available(self.filter(kind=ThesisKind.MASTERS))
         elif thesis_type == ThesisTypeFilter.AVAILABLE_ENGINEERS:
-            return self.available_thesis_filter(self.filter(kind__in=ENGINEERS_KINDS))
+            return self.filter_only_available(self.filter(kind__in=ENGINEERS_KINDS))
         elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS:
-            return self.available_thesis_filter(self.filter(kind__in=BACHELORS_KINDS))
+            return self.filter_only_available(self.filter(kind__in=BACHELORS_KINDS))
         elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS_OR_ENGINEERS:
-            return self.available_thesis_filter(self.filter(kind__in=BACHELORS_OR_ENGINEERS_KINDS))
+            return self.filter_only_available(self.filter(kind__in=BACHELORS_OR_ENGINEERS_KINDS))
         elif thesis_type == ThesisTypeFilter.AVAILABLE_ISIM:
-            return self.available_thesis_filter(self.filter(kind__in=ISIM_KINDS))
+            return self.filter_only_available(self.filter(kind__in=ISIM_KINDS))
         # Should never get here
         return self
+
+    def filter_only_available(self: QuerySet):
+        """Returns only theses that are considered "available"
+        """
+        return self.exclude(
+            status=ThesisStatus.IN_PROGRESS
+        ).exclude(_is_archived=True).filter(reserved_until__isnull=True)
 
     def filter_by_user(self: QuerySet, user: User):
         """Filter the queryset based on special logic depending
