@@ -11,6 +11,7 @@ router.register("theses_ac_students", views.StudentAutocomplete, base_name="thes
 router.register("theses_ac_employees", views.EmployeeAutocomplete, base_name="theses_ac_employees")
 
 urlpatterns = [
+    path("", views.theses_main, name="main"),
     path("api/current_user/", views.get_current_user, name="current_user"),
     path("api/", include(router.urls))
 ]

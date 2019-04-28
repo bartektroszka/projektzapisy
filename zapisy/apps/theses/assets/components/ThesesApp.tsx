@@ -64,6 +64,7 @@ class ThesesAppInternal extends React.Component<Props, State> {
 		try {
 			await this.props.initPromise;
 		} catch (err) {
+			console.error(err);
 			this.setState({ applicationError: err });
 		}
 	}

@@ -1,5 +1,7 @@
 from typing import Optional
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.db.models import Value
 from django.db.models.functions import Concat
 from rest_framework import viewsets, permissions, exceptions
@@ -13,6 +15,12 @@ from . import serializers
 from .drf_permission_classes import ThesisPermissions
 from .users import get_theses_board
 from .enums import ThesisTypeFilter
+
+
+@login_required
+def theses_main(request):
+    return render(request, "theses/main.html")
+
 
 """Names of processing parameters in query strings"""
 THESIS_TYPE_FILTER_NAME = "type"
