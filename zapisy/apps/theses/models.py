@@ -1,12 +1,14 @@
 from datetime import datetime
 
-from choicesenum import ChoicesEnum
 from choicesenum.django.fields import EnumIntegerField
 from django.db import models
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
 from apps.users.models import Employee, Student
+
+from .enums import ThesisKind, ThesisStatus
+from .managers import APIManager
 
 MAX_THESIS_TITLE_LEN = 300
 
@@ -28,24 +30,6 @@ class MyEnumIntegerField(EnumIntegerField):
         return super().to_python(value)
 
 
-class ThesisKind(ChoicesEnum):
-    MASTERS = 0, "mgr"
-    ENGINEERS = 1, "inż"
-    BACHELORS = 2, "lic"
-    ISIM = 3, "isim"
-    # Certain theses will be appropriate for both bachelor and engineer degrees
-    BACHELORS_ENGINEERS = 4, "lic+inż"
-    BACHELORS_ENGINEERS_ISIM = 5, "lic+inż+isim"
-
-
-class ThesisStatus(ChoicesEnum):
-    BEING_EVALUATED = 1, "weryfikowana przez komisję"
-    RETURNED_FOR_CORRECTIONS = 2, "zwrócona do poprawek"
-    ACCEPTED = 3, "zaakceptowana"
-    IN_PROGRESS = 4, "w realizacji"
-    DEFENDED = 5, "obroniona"
-
-
 class Thesis(models.Model):
     """Represents a thesis in the theses system.
     A Thesis instance can represent a thesis in many different
@@ -65,6 +49,9 @@ class Thesis(models.Model):
     The advisor is then permitted to change its status to 'archived'
     after the student completes and presents it.
     """
+
+    objects = models.Manager()
+    rest_objects = APIManager()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

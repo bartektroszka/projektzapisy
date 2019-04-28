@@ -2,7 +2,6 @@
 on users of the theses system"""
 from enum import Enum
 
-from django.contrib.auth.models import User
 from apps.users.models import BaseUser, Employee, Student, is_user_in_group
 
 THESIS_BOARD_GROUP_NAME = "Komisja prac dyplomowych"
