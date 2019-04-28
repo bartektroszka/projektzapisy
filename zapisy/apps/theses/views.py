@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 
-from apps.users.models import Student, Employee, wrap_user
+from apps.users.models import Student, Employee
 from .models import Thesis
 from . import serializers
 from .drf_permission_classes import ThesisPermissions
@@ -51,14 +51,12 @@ class ThesesViewSet(viewsets.ModelViewSet):
         sort_column = self.request.query_params.get(THESIS_SORT_COLUMN_NAME, "")
         sort_dir = self.request.query_params.get(THESIS_SORT_DIR_NAME, "")
 
-        user = wrap_user(self.request.user)
-
         theses = Thesis.rest_objects.get_queryset().filter_by_type(
             requested_type
-        ).filter_by_user(user)
+        ).filter_by_user(self.request.user)
 
         if requested_only_mine:
-            theses = theses.filter_only_mine(user)
+            theses = theses.filter_only_mine(self.request.user)
         if requested_title:
             theses = theses.filter_by_title(requested_title)
         if requested_advisor_name:
@@ -99,8 +97,7 @@ class EmployeesViewSet(viewsets.ModelViewSet):
 @permission_classes((permissions.IsAuthenticated,))
 def get_current_user(request):
     """Allows the front end to query the current thesis user role"""
-    wrapped_user = wrap_user(request.user)
-    serializer = serializers.CurrentUserSerializer(wrapped_user)
+    serializer = serializers.CurrentUserSerializer(request.user)
     return Response(serializer.data)
 
 

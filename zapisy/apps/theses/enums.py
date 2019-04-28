@@ -67,3 +67,13 @@ NOT_READY_STATUSES = (
     ThesisStatus.BEING_EVALUATED,
     ThesisStatus.RETURNED_FOR_CORRECTIONS
 )
+
+
+class ThesisUserType(Enum):
+    """Used only by serializers, to tell frontend client code
+    about various user types
+    """
+    STUDENT = 0
+    REGULAR_EMPLOYEE = 1
+    ADMIN = 2
+    NONE = 3

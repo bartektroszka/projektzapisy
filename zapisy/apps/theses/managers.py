@@ -3,8 +3,8 @@ with prefetching and several common filters
 """
 from typing import List
 
+from django.contrib.auth.models import User
 from django.db import models
-
 from django.db.models import Value, When, Case, BooleanField, QuerySet, Q
 from django.db.models.functions import Concat, Lower
 
@@ -14,24 +14,9 @@ from .enums import (
     ENGINEERS_KINDS, BACHELORS_KINDS, BACHELORS_OR_ENGINEERS_KINDS,
     ISIM_KINDS, NOT_READY_STATUSES
 )
-from .users import ThesisUserType, is_student, get_user_type
 
 
 class APIQueryset(models.QuerySet):
-    def theses_filter(
-        self, user: BaseUser, thesis_type: ThesisTypeFilter,
-        title: str, advisor_name: str, only_mine: bool,
-    ) -> QuerySet:
-        result = self._thesis_type_filter(thesis_type)
-        result = self._user_filter(result, user)
-        if only_mine:
-            result = self._only_mine_filter(result, user)
-        if title:
-            result = result.filter(title__icontains=title)
-        if advisor_name:
-            result = result.filter(_advisor_name__icontains=advisor_name)
-        return result
-
     def filter_available(self: QuerySet) -> QuerySet:
         """Returns only theses that are considered "available" from the specified queryset"""
         return self.exclude(
@@ -69,12 +54,12 @@ class APIQueryset(models.QuerySet):
         # Should never get here
         return self
 
-    def filter_by_user(self: QuerySet, user: BaseUser):
+    def filter_by_user(self: QuerySet, user: User):
         """Filter the queryset based on special logic depending
         on the type of the user
         """
         # Students should not see theses that are not "ready" yet
-        if is_student(user):
+        if BaseUser.is_student(user):
             return self.exclude(status__in=NOT_READY_STATUSES)
         return self
 
@@ -84,11 +69,14 @@ class APIQueryset(models.QuerySet):
     def filter_by_advisor(self: QuerySet, advisor: str):
         return self.filter(_advisor_name__icontains=advisor)
 
-    def filter_only_mine(self: QuerySet, user: BaseUser):
-        user_type = get_user_type(user)
-        if user_type == ThesisUserType.STUDENT:
-            return self.filter(students__in=[user])
-        return self.filter(Q(advisor=user) | Q(supporting_advisor=user))
+    def filter_only_mine(self: QuerySet, user: User):
+        if BaseUser.is_student(user):
+            return self.filter(students__in=[user.student])
+        elif BaseUser.is_employee(user):
+            return self.filter(Q(advisor=user.employee) | Q(supporting_advisor=user.employee))
+        else:
+            # this is an error situation, one of the conditions above should have caught it
+            return self
 
     def sort(self: QuerySet, sort_column: str, sort_dir: str) -> QuerySet:
         """Sort the specified queryset first by archived status (unarchived theses first),

@@ -9,14 +9,18 @@ from typing import Dict, Any, Optional
 
 from rest_framework import serializers, exceptions
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
+from django.contrib.auth.models import User
 
-from apps.users.models import Employee, Student, BaseUser, wrap_user
+from apps.users.models import Employee, Student, BaseUser
 from .models import Thesis, ThesisStatus, MAX_THESIS_TITLE_LEN
-from .users import get_user_type, get_theses_user_full_name
+from .users import (
+    get_theses_user_full_name, is_theses_admin, is_theses_regular_employee
+)
 from .permissions import (
     can_set_advisor, can_set_status_for_new, can_change_status_to, can_change_title
 )
 from .drf_errors import ThesisNameConflict
+from .enums import ThesisUserType
 
 GenericDict = Dict[str, Any]
 
@@ -35,7 +39,7 @@ class ThesesPersonSerializer(serializers.Serializer):
     def to_representation(self, instance: BaseUser):
         return {
             "id": instance.pk,
-            "name": get_theses_user_full_name(instance)
+            "name": get_theses_user_full_name(instance.user)
         }
 
     def to_internal_value(self, data):
@@ -68,7 +72,7 @@ def validate_new_title_for_instance(title: str, instance: Optional[Thesis]):
         raise ThesisNameConflict()
 
 
-def check_advisor_permissions(user: BaseUser, advisor: Employee):
+def check_advisor_permissions(user: User, advisor: Employee):
     """Check that the current user is permitted to set the specified advisor"""
     if not can_set_advisor(user, advisor):
         raise exceptions.PermissionDenied(f'This type of user cannot set advisor to {advisor}')
@@ -117,8 +121,7 @@ class ThesisSerializer(serializers.ModelSerializer):
         from validate_add_thesis
         """
         # First check that the user is permitted to set these values
-        request = self.context["request"]
-        user = wrap_user(request.user)
+        user = self.context["request"].user
         check_advisor_permissions(user, validated_data["advisor"])
         status = validated_data["status"]
         if not can_set_status_for_new(user, ThesisStatus(status)):
@@ -138,8 +141,7 @@ class ThesisSerializer(serializers.ModelSerializer):
 
     def update(self, instance: Thesis, validated_data: GenericDict):
         """Called in response to a successfully validated PATCH request"""
-        request = self.context["request"]
-        user = wrap_user(request.user)
+        user = self.context["request"].user
         if "advisor" in validated_data:
             check_advisor_permissions(user, validated_data["advisor"])
         if "status" in validated_data and not can_change_status_to(
@@ -190,13 +192,36 @@ class ThesisSerializer(serializers.ModelSerializer):
 
 
 class CurrentUserSerializer(serializers.ModelSerializer):
-    """Serialize the currently logged in user; this also needs to send the user type,
-    so it's a separate serializer"""
-    def to_representation(self, instance: BaseUser):
+    """Serialize the currently logged in user; this is a separate serializer
+    (i.e. we don't just use ThesesPersonSerializer) because it also needs to send the type
+    """
+    def to_representation(self, instance: User):
         return {
-            "user": ThesesPersonSerializer(instance).data,
-            "type": get_user_type(instance).value
+            # The ThesesPersonSerializer needs to work with BaseUser instances,
+            # because it's used for serializing thesis person
+            "user": ThesesPersonSerializer(CurrentUserSerializer._to_base_person(instance)),
+            "type": CurrentUserSerializer._serialize_user_type(instance).value,
         }
+
+    @staticmethod
+    def _serialize_user_type(user: User):
+        if is_theses_admin(user):
+            return ThesisUserType.ADMIN
+        elif is_theses_regular_employee(user):
+            return ThesisUserType.REGULAR_EMPLOYEE
+        elif BaseUser.is_student(user):
+            return ThesisUserType.STUDENT
+        # We're generally not expecting this to happen
+        else:
+            return ThesisUserType.NONE
+
+    @staticmethod
+    def _to_base_person(user: User):
+        if BaseUser.is_employee(user):
+            return user.employee
+        elif BaseUser.is_student(user):
+            return user.student
+        raise exceptions.NotFound()
 
 
 class ThesesBoardMemberSerializer(serializers.ModelSerializer):
