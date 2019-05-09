@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from choicesenum.django.fields import EnumIntegerField
 from django.db import models
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
@@ -11,23 +10,6 @@ from .enums import ThesisKind, ThesisStatus
 from .managers import APIManager
 
 MAX_THESIS_TITLE_LEN = 300
-
-
-class MyEnumIntegerField(EnumIntegerField):
-    """In choicesenum/django/fields.py, class EnumFieldMixin,
-    the author defines a `to_python` method that in the case of IntegerFields
-    only works with ints. This is in violation of Django's API:
-    https://docs.djangoproject.com/en/2.2/howto/custom-model-fields/#converting-values-to-python-objects
-    the docs clearly state that `to_python` "should deal gracefully with strings", and indeed,
-    when using the admin interface, the values passed here will be (numeric) strings,
-    and so errors will be thrown when validating those model fields (because the enum conversion
-    function only accepts ints);
-    this simple patch prevents that
-    """
-    def to_python(self, value):
-        if isinstance(value, str):
-            value = int(value)
-        return super().to_python(value)
 
 
 class Thesis(models.Model):
@@ -73,8 +55,8 @@ class Thesis(models.Model):
         Employee, on_delete=models.PROTECT, blank=True, null=True,
         related_name='thesis_supporting_advisor'
     )
-    kind = MyEnumIntegerField(enum=ThesisKind, default=ThesisKind.MASTERS)
-    status = MyEnumIntegerField(enum=ThesisStatus, default=ThesisStatus.BEING_EVALUATED)
+    kind = models.SmallIntegerField(choices=ThesisKind.choices())
+    status = models.SmallIntegerField(choices=ThesisStatus.choices())
     # How long the assigned student(s) has/have to complete their work on this thesis
     # Note that this is only a convenience field for the users, the system
     # does not enforce this in any way
