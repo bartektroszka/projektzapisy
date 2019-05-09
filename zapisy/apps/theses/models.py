@@ -32,6 +32,7 @@ class MyEnumIntegerField(EnumIntegerField):
 
 class Thesis(models.Model):
     """Represents a thesis in the theses system.
+
     A Thesis instance can represent a thesis in many different
     configurations (an idea submitted by an employee, a work in progress
     by a student, or a thesis defended years ago). This is accomplished
@@ -87,11 +88,12 @@ class Thesis(models.Model):
     def is_archived(self):
         return self.status == ThesisStatus.DEFENDED
 
-    """Check if this thesis has any students assigned.
-    NOTICE: this will query the DB. For processing multiple theses,
-    you should annotate each object instead.
-    """
     def has_any_students_assigned(self):
+        """Check if this thesis has any students assigned.
+
+        NOTICE: this will query the DB. For processing multiple theses,
+        you should annotate each object instead.
+        """
         return self.students.all().exists()
 
     def get_students(self):
@@ -102,6 +104,7 @@ class Thesis(models.Model):
 
     def set_students(self, students):
         """Given an interable of students, assign them as to this thesis.
+
         We don't use ManyToManyRelatedManager#set as it doesn't maintain the
         order in which items are specified, which matters to us here
         (the add() with multiple argument has the same problem - we need to execute
@@ -121,9 +124,9 @@ class Thesis(models.Model):
         self.title = self.title.strip()
 
     def _adjust_status(self):
-        """If there is a student and the thesis has been accepted, we automatically
-        move it to "in progress"; conversely, if it was in progress but the students
-        have been removed, go back to accepted
+        """If there is at least one student and the thesis has been accepted,
+        we automatically move it to "in progress"; conversely,
+        if it was in progress but the students have been removed, go back to accepted
         """
         current_status = ThesisStatus(self.status)
         has_students = self.has_any_students_assigned()
@@ -150,6 +153,24 @@ class Thesis(models.Model):
 
 @receiver(m2m_changed, sender=Thesis.students.through)
 def thesis_students_changed(sender, **kwargs):
+    """After the `students` field changes for a thesis,
+    we should adjust the status according to the logic defined in
+    `Thesis._adjust_status`.
+
+    This has to be done via a signal because m2m relationships are not
+    usable until all objects have been saved to the DB and have IDs available
+    for use, so doing this in save() would not be enough: for instance,
+    a new thesis is created, its save() method runs, no students are yet
+    defined, so its status is set to accepted. Only after the save()
+    method exits, the students can be defined, but this is not picked up
+    by the save method since it's not run again.
+
+    However: we still need to update the status in save() because
+    theoretically, this may need to be done even without any changes
+    to the `students` field: the advisor may change the status to 'accepted'
+    with some students already defined, at which point we should immediately
+    move it to 'in progress'
+    """
     instance = kwargs["instance"]
     instance._adjust_status()
     instance.save(skip_status_update=True)

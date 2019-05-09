@@ -56,12 +56,11 @@ class ThesesPersonSerializer(serializers.Serializer):
 
 
 def validate_new_title_for_instance(title: str, instance: Optional[Thesis]):
-    """
-    Validate that the supplied title is valid for the supplied instance,
+    """Validate that the supplied title is valid for the supplied instance,
     or for a new thesis if not supplied"""
-    # I don't like this very much since there's a race condition here,
+    # There is a potential race condition here,
     # but it seems Django doesn't think you should worry about it;
-    # they have very similar logic with their validate_unique method:
+    # they have very similar logic in their validate_unique method:
     # https://docs.djangoproject.com/en/2.1/ref/models/instances/#django.db.models.Model.validate_unique
     # (they first perform this validation, and later hit the DB with the update)
     # and SO seems to agree: https://stackoverflow.com/q/25702813
@@ -94,14 +93,14 @@ class ThesisSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         result = super().to_internal_value(data)
-        if "students" in data:
-            # I need to do this manually as DRF won't let me create writable method fields
+        if 'students' in data:
+            # We need to do this manually as DRF won't let us create writable method fields
             students_serializer = ThesesPersonSerializer(
-                queryset=Student.objects.all(), data=data["students"], many=True
+                queryset=Student.objects.all(), data=data['students'], many=True
             )
             if not students_serializer.is_valid():
                 raise serializers.ValidationError("'students' should be an array of valid student IDs")
-            result["students"] = students_serializer.validated_data
+            result['students'] = students_serializer.validated_data
         return result
 
     def get_students(self, instance: Thesis):

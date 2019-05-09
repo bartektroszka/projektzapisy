@@ -52,14 +52,12 @@ def can_modify_thesis(user: User, thesis: Thesis) -> bool:
     return is_thesis_staff(user) or is_owner_of_thesis(user, thesis)
 
 
-"""The detailed checks below will only be performed
-if it is determined that the user is permitted to modify the thesis in general,
-so there's no need to check that again
-"""
-
-
 def can_change_title(user: User, thesis: Thesis) -> bool:
-    """Is the specified user permitted to change the title of the specified thesis?"""
+    """Is the specified user permitted to change the title of the specified thesis?
+
+    Only called if the user is permitted to modify the thesis in general
+    (that is, `can_modify_thesis` returns True)
+    """
     allowed_statuses = (ThesisStatus.BEING_EVALUATED, ThesisStatus.RETURNED_FOR_CORRECTIONS)
     return (
         is_thesis_staff(user) or
@@ -68,13 +66,21 @@ def can_change_title(user: User, thesis: Thesis) -> bool:
 
 
 def can_set_status_for_new(user: User, status: ThesisStatus) -> bool:
-    """Can the specified user set the specified status for a new thesis?"""
+    """Can the specified user set the specified status for a new thesis?
+
+    Only called if the user is permitted to modify the thesis in general
+    (that is, `can_modify_thesis` returns True)
+    """
     return is_thesis_staff(user) or status == ThesisStatus.BEING_EVALUATED
 
 
 def can_change_status_to(user: User, thesis: Thesis, new_status: ThesisStatus) -> bool:
     """Can the specified user change the status
-    of the specified thesis to the new specified status?"""
+    of the specified thesis to the new specified status?
+
+    Only called if the user is permitted to modify the thesis in general
+    (that is, `can_modify_thesis` returns True)
+    """
     old_status = ThesisStatus(thesis.status)
     return (
         is_thesis_staff(user) or
@@ -83,5 +89,9 @@ def can_change_status_to(user: User, thesis: Thesis, new_status: ThesisStatus) -
 
 
 def can_set_advisor(user: User, advisor: Optional[Employee]) -> bool:
-    """Is the specified user permitted to set the given advisor (may be None)?"""
+    """Is the specified user permitted to set the given advisor (may be None)?
+
+    Only called if the user is permitted to modify the thesis in general
+    (that is, `can_modify_thesis` returns True)
+    """
     return is_thesis_staff(user) or (BaseUser.is_employee(user) and user.employee == advisor)
