@@ -246,7 +246,7 @@ def vote_to_string(vote_value: int) -> str:
 class ThesisVoteBinding(models.Model):
     thesis = models.ForeignKey(Thesis, on_delete=models.CASCADE, related_name="votes")
     voter = models.ForeignKey(Employee, on_delete=models.PROTECT)
-    value = EnumIntegerField(enum=ThesisVote, default=ThesisVote.NONE)
+    value = models.SmallIntegerField(choices=ThesisVote.choices())
     # Usually only filled out if the value is 'rejected'
     reason = models.CharField(max_length=MAX_REJECTION_REASON_LENGTH, blank=True)
 

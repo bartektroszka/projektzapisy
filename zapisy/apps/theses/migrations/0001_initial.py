@@ -6,8 +6,6 @@ import apps.theses.validators
 from django.db import migrations, models
 import django.db.models.deletion
 
-import choicesenum.django.fields
-
 
 class Migration(migrations.Migration):
 
@@ -55,7 +53,7 @@ class Migration(migrations.Migration):
             name='ThesisVoteBinding',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('value', choicesenum.django.fields.EnumIntegerField(default=apps.theses.models.ThesisVote(1), enum=apps.theses.models.ThesisVote)),
+                ('value', models.SmallIntegerField(choices=[(apps.theses.enums.ThesisVote(1), 'brak głosu'), (apps.theses.enums.ThesisVote(2), 'odrzucona'), (apps.theses.enums.ThesisVote(3), 'zaakceptowana')])),
                 ('reason', models.CharField(blank=True, max_length=500)),
                 ('thesis', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='votes', to='theses.Thesis')),
                 ('voter', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='users.Employee')),
