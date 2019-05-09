@@ -8,6 +8,7 @@ from choicesenum.patches import patch_json
 # see https://github.com/loggi/python-choicesenum#JSON
 patch_json()
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 env = environ.Env()

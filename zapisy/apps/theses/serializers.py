@@ -96,7 +96,7 @@ class ThesisSerializer(serializers.ModelSerializer):
         if 'students' in data:
             # We need to do this manually as DRF won't let us create writable method fields
             students_serializer = ThesesPersonSerializer(
-                queryset=Student.objects.all(), data=data['students'], many=True
+                queryset=Student.objects.select_related('user'), data=data['students'], many=True
             )
             if not students_serializer.is_valid():
                 raise serializers.ValidationError("'students' should be an array of valid student IDs")
