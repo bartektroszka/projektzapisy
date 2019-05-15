@@ -81,9 +81,8 @@ class APIQueryset(models.QuerySet):
             return self.filter(students__in=[user.student])
         elif BaseUser.is_employee(user):
             return self.filter(Q(advisor=user.employee) | Q(supporting_advisor=user.employee))
-        else:
-            # this is an error situation, one of the conditions above should have caught it
-            return self
+        # this is an error situation, one of the conditions above should have caught it
+        return self
 
     def sort(self: QuerySet, sort_column: str, sort_dir: str) -> QuerySet:
         """Sort the specified queryset first by archived status (unarchived theses first),

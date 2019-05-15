@@ -211,8 +211,7 @@ class CurrentUserSerializer(serializers.ModelSerializer):
         elif BaseUser.is_student(user):
             return ThesisUserType.STUDENT
         # We're generally not expecting this to happen
-        else:
-            return ThesisUserType.NONE
+        return ThesisUserType.NONE
 
     @staticmethod
     def _to_base_person(user: User):

@@ -66,13 +66,12 @@ class ThesesViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def _parse_thesis_type(type_str: Optional[str]):
-        try:
-            if type_str:
+        if type_str:
+            try:
                 return ThesisTypeFilter(int(type_str))
-            else:
-                return ThesisTypeFilter.DEFAULT
-        except ValueError:
-            raise exceptions.ParseError(f'Unknown filter value {type_str}')
+            except ValueError:
+                raise exceptions.ParseError(f'Unknown filter value {type_str}')
+        return ThesisTypeFilter.DEFAULT
 
 
 class ThesesBoardViewSet(viewsets.ModelViewSet):
