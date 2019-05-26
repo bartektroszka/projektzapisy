@@ -8,4 +8,5 @@ class ThesisAdmin(admin.ModelAdmin):
     autocomplete_fields = ['advisor', 'supporting_advisor']
     form = ThesisForm
 
+
 admin.site.register(models.Thesis, ThesisAdmin)

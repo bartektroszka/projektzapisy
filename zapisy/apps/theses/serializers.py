@@ -105,9 +105,11 @@ class ThesisSerializer(serializers.ModelSerializer):
                 queryset=Student.objects.select_related('user'), data=data['students'], many=True
             )
             if not students_serializer.is_valid():
-                raise serializers.ValidationError("'students' should be an array of valid student IDs")
+                raise serializers.ValidationError({'students': ["should be an array of valid student IDs"]})
             if len(students_serializer.validated_data) > MAX_STUDENTS_PER_THESIS:
-                raise serializers.ValidationError(f'No more than {MAX_STUDENTS_PER_THESIS} students allowed per thesis')
+                raise serializers.ValidationError(
+                    {'students': [f'no more than {MAX_STUDENTS_PER_THESIS} students allowed per thesis']}
+                )
             result['students'] = students_serializer.validated_data
         return result
 

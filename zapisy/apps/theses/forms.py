@@ -2,6 +2,7 @@ from django import forms
 from .models import Thesis
 from .defs import MAX_STUDENTS_PER_THESIS
 
+
 class ThesisForm(forms.ModelForm):
     class Meta:
         model = Thesis
