@@ -79,24 +79,12 @@ class Thesis(models.Model):
         return self.students.all().exists()
 
     def get_students(self):
-        """Get all the students assigned to this thesis in the proper order
-        (students.all() doesn't order them properly)
-        """
-        return self.students.order_by(self.__sort_criterion)
+        """Get all the students assigned to this thesis."""
+        return self.students.all()
 
     def set_students(self, students):
-        """Given an interable of students, assign them as to this thesis.
-
-        We don't use ManyToManyRelatedManager#set as it doesn't maintain the
-        order in which items are specified, which matters to us here
-        (the add() with multiple argument has the same problem - we need to execute
-        a query per student to ensure they're appended to the end of the table
-        in the order we want. In practice this is not a problem as we always have just a few
-        students per thesis at most)
-        """
-        self.students.clear()
-        for student in students:
-            self.students.add(student)
+        """Given an interable of students, assign them as to this thesis."""
+        self.students.set(students)
 
     def __str__(self) -> str:
         return self.title

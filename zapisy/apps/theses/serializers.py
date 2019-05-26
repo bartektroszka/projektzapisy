@@ -21,6 +21,7 @@ from .permissions import (
 )
 from .drf_errors import ThesisNameConflict
 from .enums import ThesisUserType, ThesisKind
+from .defs import MAX_STUDENTS_PER_THESIS
 
 GenericDict = Dict[str, Any]
 
@@ -98,13 +99,15 @@ class ThesisSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         result = super().to_internal_value(data)
+        # We need to do this manually as DRF won't let us create writable method fields
         if 'students' in data:
-            # We need to do this manually as DRF won't let us create writable method fields
             students_serializer = ThesesPersonSerializer(
                 queryset=Student.objects.select_related('user'), data=data['students'], many=True
             )
             if not students_serializer.is_valid():
                 raise serializers.ValidationError("'students' should be an array of valid student IDs")
+            if len(students_serializer.validated_data) > MAX_STUDENTS_PER_THESIS:
+                raise serializers.ValidationError(f'No more than {MAX_STUDENTS_PER_THESIS} students allowed per thesis')
             result['students'] = students_serializer.validated_data
         return result
 
