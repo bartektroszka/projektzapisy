@@ -5,7 +5,7 @@ import { roundUp, wait } from "common/utils";
 import { getThesesList } from "../backend_callers";
 import { Thesis } from "../thesis";
 import { ThesesProcessParams, SortColumn, SortDirection, ApplicationState } from "../app_types";
-import { ThesisTypeFilter } from "../protocol_types";
+import { ThesisTypeFilter } from "../protocol";
 import { Users } from "./users";
 import { AppMode } from "./app_mode";
 

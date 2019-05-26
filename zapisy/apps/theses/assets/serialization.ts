@@ -2,7 +2,7 @@
  * @file Defines types we'll be sending to the backend and provides
  * functions to serialize local objects to those types
  */
-import { ThesisKind, ThesisStatus } from "./protocol_types";
+import { ThesisKind, ThesisStatus } from "./protocol";
 import { Thesis, MAX_THESIS_TITLE_LEN } from "./thesis";
 import { Person } from "./users";
 import { Moment } from "moment";

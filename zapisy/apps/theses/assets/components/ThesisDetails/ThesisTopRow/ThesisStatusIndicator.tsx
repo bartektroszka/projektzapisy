@@ -3,7 +3,7 @@ import { without } from "lodash";
 
 import { GenericSelect } from "../../GenericSelect";
 import { InputWithLabel, InputType } from "./InputWithLabel";
-import { ThesisStatus, thesisStatusToString } from "../../../protocol_types";
+import { ThesisStatus, thesisStatusToString } from "../../../protocol";
 import { Thesis } from "../../../thesis";
 import { canChangeStatusTo } from "../../../permissions";
 

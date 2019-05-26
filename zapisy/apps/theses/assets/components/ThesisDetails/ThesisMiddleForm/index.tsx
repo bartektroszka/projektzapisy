@@ -8,7 +8,7 @@ import { AddRemoveIcon, IconType } from "./AddRemoveIcon";
 import { canSetArbitraryAdvisor, canModifyThesis, canChangeTitle } from "../../../permissions";
 import { Thesis, MAX_THESIS_TITLE_LEN } from "../../../thesis";
 import { Employee, Student } from "../../../users";
-import { ThesisKind } from "../../../protocol_types";
+import { ThesisKind, MAX_STUDENTS_PER_THESIS } from "../../../protocol";
 
 const MidFormTable = styled.table`
 	width: 100%;
@@ -213,7 +213,7 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 							/>
 							: null
 						}
-						{ !readOnly && idx === len - 1
+						{ !readOnly && idx === len - 1 && len < MAX_STUDENTS_PER_THESIS
 							? <AddRemoveIcon
 								onClick={() => this.onAddAnotherStudent()}
 								type={IconType.Add}

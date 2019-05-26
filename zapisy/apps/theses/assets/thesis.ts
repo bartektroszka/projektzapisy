@@ -3,7 +3,7 @@
  */
 import * as moment from "moment";
 import { Employee, Student, Person } from "./users";
-import { ThesisKind, ThesisStatus } from "./protocol_types";
+import { ThesisKind, ThesisStatus } from "./protocol";
 import { nullableValuesEqual } from "./utils";
 
 export const MAX_THESIS_TITLE_LEN = 300;

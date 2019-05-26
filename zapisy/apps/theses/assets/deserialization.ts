@@ -1,6 +1,6 @@
 import * as moment from "moment";
 
-import { ThesisKind, ThesisStatus, UserType } from "./protocol_types";
+import { ThesisKind, ThesisStatus, UserType } from "./protocol";
 import { Thesis } from "./thesis";
 import { Employee, Student, AppUser } from "./users";
 import { Users } from "./app_logic/users";

@@ -1,5 +1,5 @@
 /**
- * @file Defines misc types used when interacting with the backend;
+ * @file Defines misc types & constants used when interacting with the backend;
  * this should be kept synchronized with types defined there
  */
 
@@ -104,3 +104,5 @@ export function thesisTypeFilterToString(type: ThesisTypeFilter) {
 		case ThesisTypeFilter.AvailableISIM: return "ISIM – dostępne";
 	}
 }
+
+export const MAX_STUDENTS_PER_THESIS = 2;

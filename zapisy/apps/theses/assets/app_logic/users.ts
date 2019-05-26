@@ -1,7 +1,7 @@
 import { observable, flow } from "mobx";
 import { getCurrentUser, getThesesBoard, getEmployees, FAKE_USER } from "../backend_callers";
 import { Employee, AppUser } from "../users";
-import { UserType } from "../protocol_types";
+import { UserType } from "../protocol";
 
 class C {
 	@observable public employees: Employee[] = [];

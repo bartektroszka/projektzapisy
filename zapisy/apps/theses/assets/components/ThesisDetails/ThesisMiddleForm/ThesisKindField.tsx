@@ -6,7 +6,7 @@ import * as React from "react";
 
 import { GenericSelect } from "../../GenericSelect";
 import { ReadOnlyInput } from "./ReadOnlyInput";
-import { ThesisKind, thesisKindToString } from "../../../protocol_types";
+import { ThesisKind, thesisKindToString } from "../../../protocol";
 
 const kindSelectInfos = [
 	ThesisKind.Masters,

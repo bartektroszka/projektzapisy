@@ -1,4 +1,4 @@
-import { UserType } from "./protocol_types";
+import { UserType } from "./protocol";
 
 /**
  * Represents a person in the thesis system

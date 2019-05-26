@@ -9,7 +9,7 @@ import { ThesisStatusIndicator } from "./ThesisStatusIndicator";
 import { ThesisWorkMode } from "../../../app_types";
 import { canModifyThesis } from "../../../permissions";
 import { Thesis } from "../../../thesis";
-import { ThesisStatus } from "../../../protocol_types";
+import { ThesisStatus } from "../../../protocol";
 import { ThesisReservationIndicator } from "./ThesisReservationIndicator";
 import { InputWithLabel, InputType } from "./InputWithLabel";
 import { formatDateTime } from "../../../utils";

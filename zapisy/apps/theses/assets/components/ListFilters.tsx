@@ -7,7 +7,7 @@ import styled from "styled-components";
 
 import { GenericSelect } from "./GenericSelect";
 import { ApplicationState } from "../app_types";
-import { ThesisTypeFilter, thesisTypeFilterToString } from "../protocol_types";
+import { ThesisTypeFilter, thesisTypeFilterToString } from "../protocol";
 import { StringFilter } from "../app_logic/theses_list";
 
 const typeFilters = [

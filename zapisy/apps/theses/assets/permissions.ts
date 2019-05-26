@@ -1,7 +1,7 @@
 /**
  * @file Theses app permission checks, mostly analogous to permissions.py
  */
-import { ThesisStatus } from "./protocol_types";
+import { ThesisStatus } from "./protocol";
 import { Thesis } from "./thesis";
 import { Users } from "./app_logic/users";
 

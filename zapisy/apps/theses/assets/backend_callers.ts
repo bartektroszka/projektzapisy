@@ -11,7 +11,7 @@ import { compact } from "lodash";
 import { SortColumn, SortDirection, ThesesProcessParams } from "./app_types";
 import { ThesisNameConflict } from "./errors";
 import { AppUser, Student, Person, Employee } from "./users";
-import { UserType } from "./protocol_types";
+import { UserType } from "./protocol";
 import {
 	ThesisInJson, deserializeThesis,
 	deserializeCurrentUser, deserializeEmployee, deserializeBoardMember,

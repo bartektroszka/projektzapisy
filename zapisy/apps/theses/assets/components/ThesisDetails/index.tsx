@@ -16,7 +16,7 @@ import { ThesisWorkMode, ApplicationState } from "../../app_types";
 import { canModifyThesis, canDeleteThesis } from "../../permissions";
 import { Thesis } from "../../thesis";
 import { Employee, Student } from "../../users";
-import { ThesisStatus, ThesisKind } from "../../protocol_types";
+import { ThesisStatus, ThesisKind } from "../../protocol";
 import { AppMode } from "../../app_logic/app_mode";
 import { confirmationDialog } from "../Dialogs/ConfirmationDialog";
 import { formatTitle } from "../util";
