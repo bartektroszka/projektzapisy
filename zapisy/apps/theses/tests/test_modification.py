@@ -1,3 +1,5 @@
+import random
+
 from rest_framework import status
 from django.urls import reverse
 
@@ -10,6 +12,7 @@ from ..models import (
 from ..enums import UNVOTEABLE_STATUSES, NOT_READY_STATUSES
 from ..system_settings import get_num_required_votes
 from ..serializers import GenericDict
+from ..defs import MAX_STUDENTS_PER_THESIS
 from .base import ThesesBaseTestCase
 from .utils import (
     random_vote, random_reserved_until,
@@ -370,3 +373,18 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
     def test_cannot_set_invalid_kind(self):
         self.run_test_with_board_members(self.ensure_cannot_set_invalid_kind_as_user)
         self.ensure_cannot_set_invalid_kind_as_user(self.advisor)
+
+    def ensure_cannot_exceed_students_limit_as_user(self, user: BaseUser):
+        self.login_as(user)
+        num_students = MAX_STUDENTS_PER_THESIS + random.randint(1, 5)
+        new_student_ids = list(map(lambda s: s.pk, self.get_random_students(num_students)))
+        response = self.update_thesis_with_data(students=new_student_ids)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_exceed_student_limit(self):
+        """Make sure that no one, even admins, is allowed to assign more than
+        MAX_STUDENTS_PER_THESIS to a thesis
+        """
+        self.ensure_cannot_exceed_students_limit_as_user(self.advisor)
+        self.ensure_cannot_exceed_students_limit_as_user(self.get_random_board_member_not_admin())
+        self.ensure_cannot_exceed_students_limit_as_user(self.get_admin())
