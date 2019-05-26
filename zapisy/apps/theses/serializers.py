@@ -20,7 +20,7 @@ from .permissions import (
     can_set_advisor, can_set_status_for_new, can_change_status_to, can_change_title
 )
 from .drf_errors import ThesisNameConflict
-from .enums import ThesisUserType
+from .enums import ThesisUserType, ThesisKind
 
 GenericDict = Dict[str, Any]
 
@@ -82,6 +82,11 @@ class ThesisSerializer(serializers.ModelSerializer):
     # as we want to control the order of students (see get_students)
     students = serializers.SerializerMethodField()
     modified = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
+    # The two enum fields have to be explicitly defined, or otherwise DRF will
+    # try to serialize enum values (since the model field is an EnumIntegerField)
+    # and fail, because there is not builtin serialization for choicesenum Enums
+    status = serializers.ChoiceField(choices=[(c.value, c.display) for c in ThesisStatus])
+    kind = serializers.ChoiceField(choices=[(c.value, c.display) for c in ThesisKind])
 
     # We need to define this field here manually to disable DRF's unique validator which
     # isn't flexible enough to override the error code it returns (throws a 400, we want 409)
