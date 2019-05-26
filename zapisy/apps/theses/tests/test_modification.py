@@ -14,7 +14,7 @@ from .base import ThesesBaseTestCase
 from .utils import (
     random_vote, random_reserved_until,
     accepting_vote, rejecting_vote, random_definite_vote,
-    string_of_length,
+    string_of_length, exactly_one
 )
 
 # Students shouldn't be allowed to modify any thesis regardless of status,
@@ -103,8 +103,13 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         for response in responses:
             self.assertEqual(response.status_code, status.HTTP_200_OK)
         modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["students"][0]["id"], new_student_ids[0])
-        self.assertEqual(modified_thesis["students"][1]["id"], new_student_ids[1])
+        for new_stud_id in new_student_ids:
+            self.assertTrue(
+                exactly_one(
+                    recv_student["id"] == new_stud_id
+                    for recv_student in modified_thesis["students"]
+                )
+            )
 
     def test_emp_cannot_modify_someone_elses_thesis(self):
         """Ensure that an employee cannot modify someone else's thesis"""

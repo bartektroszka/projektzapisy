@@ -34,8 +34,13 @@ class ThesesSerializationTestCase(ThesesBaseTestCase):
         self.assertEqual(thesis["description"], self.thesis.description)
         num_serialized_students = len(thesis["students"])
         self.assertEqual(num_serialized_students, self.thesis.students.count())
-        for i in range(num_serialized_students):
-            self.assertEqual(thesis["students"][i]["id"], self.thesis.get_students()[i].pk)
+        for student in self.thesis.get_students():
+            self.assertTrue(
+                exactly_one(
+                    recv_student["id"] == student.pk
+                    for recv_student in thesis["students"]
+                )
+            )
 
     def _get_thesis_with_votes(self, user: BaseUser):
         board_members = self.get_board_members(random.randint(2, 5))
