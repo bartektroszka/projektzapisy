@@ -1,9 +1,6 @@
 import * as React from "react";
 import styled from "styled-components";
 
-import AddIconImage from "./add-icon.png";
-import RemoveIconImage from "./remove-icon.png";
-
 export const enum IconType {
 	Add,
 	Remove,
@@ -14,11 +11,10 @@ type Props = {
 	onClick: () => void;
 };
 
-const IconImg = styled.img`
+const Icon = styled.i`
 	vertical-align: top;
-	margin-top: 7.5px;
+	margin-top: 10px;
 	margin-left: 10px;
-	width: 16px;
 	cursor: pointer;
 `;
 
@@ -27,8 +23,12 @@ const IconImg = styled.img`
  * depending on whether the secondary advisor/student is present
  */
 export const AddRemoveIcon = React.memo(function(props: Props) {
-	return <IconImg
-		src={props.type === IconType.Add ? AddIconImage : RemoveIconImage}
-		onClick={props.onClick}
-	/>;
+	// You can't install onClick handlers on <i> elements
+	return <span onClick={props.onClick}>
+		<Icon
+			className={`fa ${props.type === IconType.Add ? "fa-plus" : "fa-minus"}`}
+			onClick={props.onClick}
+			aria-hidden={true}
+		/>
+	</span>;
 });
