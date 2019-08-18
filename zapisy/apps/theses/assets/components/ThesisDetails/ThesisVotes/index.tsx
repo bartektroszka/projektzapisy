@@ -5,7 +5,7 @@ import * as Mousetrap from "mousetrap";
 
 import { Thesis } from "../../../thesis";
 import { Employee, AppUser } from "../../../users";
-import { ThesisVote } from "../../../protocol_types";
+import { ThesisVote } from "../../../protocol";
 import { ThesisWorkMode } from "../../../app_types";
 import { canChangeThesisVote, canModifyThesis } from "../../../permissions";
 import { SingleVote } from "../../../votes";

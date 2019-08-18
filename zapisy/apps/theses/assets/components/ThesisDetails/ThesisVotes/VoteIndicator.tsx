@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 
 import QuestionMark from "./question-mark.png";
-import { ThesisVote } from "../../../protocol_types";
+import { ThesisVote } from "../../../protocol";
 
 type Props = {
 	value: ThesisVote;

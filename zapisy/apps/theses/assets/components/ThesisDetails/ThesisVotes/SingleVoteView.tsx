@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { ThesisVote } from "../../../protocol_types";
+import { ThesisVote } from "../../../protocol";
 import styled from "styled-components";
 import { canCastVoteAsUser, canChangeThesisVote } from "../../../permissions";
 import { VoteIndicator } from "./VoteIndicator";

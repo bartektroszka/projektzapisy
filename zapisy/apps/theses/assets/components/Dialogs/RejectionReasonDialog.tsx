@@ -2,7 +2,7 @@ import * as React from "react";
 import { confirmAlert } from "react-confirm-alert";
 import styled from "styled-components";
 
-import { MIN_REJECTION_REASON_LENGTH, MAX_REJECTION_REASON_LENGTH } from "../../protocol_types";
+import { MIN_REJECTION_REASON_LENGTH, MAX_REJECTION_REASON_LENGTH } from "../../protocol";
 import { TextDialogUI } from "./TextDialog";
 
 const BAD_REASON_TOOLTIP = (

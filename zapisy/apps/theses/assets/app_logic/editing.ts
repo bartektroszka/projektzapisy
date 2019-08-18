@@ -8,7 +8,7 @@ import { ThesisWorkMode, ApplicationState } from "../app_types";
 import { AppMode } from "./app_mode";
 import { List } from "./theses_list";
 import { Users } from "./users";
-import { ThesisTypeFilter } from "../protocol_types";
+import { ThesisTypeFilter } from "../protocol";
 import { adjustDomForUngraded } from "../utils";
 import { canSetArbitraryAdvisor } from "../permissions";
 import { Employee } from "../users";

@@ -3,7 +3,7 @@
  */
 import { compact, isEqual } from "lodash";
 
-import { ThesisVote } from "./protocol_types";
+import { ThesisVote } from "./protocol";
 import { Employee } from "./users";
 import { Users } from "./app_logic/users";
 
