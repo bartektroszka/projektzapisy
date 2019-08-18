@@ -18,7 +18,7 @@ class Thesis(models.Model):
     A Thesis instance can represent a thesis in many different
     configurations (an idea submitted by an employee, a work in progress
     by a student, or a thesis defended years ago). This is accomplished
-    through various possible combinations of mainly the 'status' and 'student'
+    through various possible combinations of mainly the 'status' and 'students'
     fields, as described in more detail below.
 
     A thesis is first added typically by a regular university employee;
