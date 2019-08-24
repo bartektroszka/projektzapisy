@@ -5,7 +5,7 @@ to objects used in the theses system, that is:
 * fine-grained permissions checks
 * performing modifications/adding new objects
 """
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from rest_framework import serializers, exceptions
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
@@ -79,9 +79,9 @@ def check_advisor_permissions(user: User, advisor: Employee):
 
 
 class ThesisSerializer(serializers.ModelSerializer):
-    # This needs to be a method field rather than just a regular nested field
-    # as we want to control the order of students (see get_students)
-    students = serializers.SerializerMethodField()
+    students = ThesesPersonSerializer(
+        queryset=Student.objects.select_related('user'), many=True, required=False
+    )
     modified = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
     # The two enum fields have to be explicitly defined, or otherwise DRF will
     # try to serialize enum values (since the model field is an EnumIntegerField)
@@ -97,32 +97,16 @@ class ThesisSerializer(serializers.ModelSerializer):
     # and manually check for uniqueness
     title = serializers.CharField(max_length=MAX_THESIS_TITLE_LEN)
 
-    def to_internal_value(self, data):
-        result = super().to_internal_value(data)
-        # We need to do this manually as DRF won't let us create writable method fields
-        if 'students' in data:
-            students_serializer = ThesesPersonSerializer(
-                queryset=Student.objects.select_related('user'), data=data['students'], many=True
-            )
-            if not students_serializer.is_valid():
-                raise serializers.ValidationError({'students': ["should be an array of valid student IDs"]})
-            if len(students_serializer.validated_data) > MAX_STUDENTS_PER_THESIS:
-                raise serializers.ValidationError(
-                    {'students': [f'no more than {MAX_STUDENTS_PER_THESIS} students allowed per thesis']}
-                )
-            result['students'] = students_serializer.validated_data
-        return result
-
-    def get_students(self, instance: Thesis):
-        """DRF will, by default, order this according to the ordering of the Student table;
-        we want to order by ID as defined in the through relation table
-        see: https://stackoverflow.com/q/48247490
-        """
-        return ThesesPersonSerializer(instance.get_students(), many=True).data
-
     def validate_title(self, new_title: str):
         validate_new_title_for_instance(new_title, self.instance)
         return new_title
+
+    def validate_students(self, students: List[Student]):
+        if len(students) > MAX_STUDENTS_PER_THESIS:
+            raise serializers.ValidationError(
+                {'students': [f'no more than {MAX_STUDENTS_PER_THESIS} students allowed per thesis']}
+            )
+        return students
 
     def create(self, validated_data: GenericDict):
         """If the checks above succeed, DRF will call this method

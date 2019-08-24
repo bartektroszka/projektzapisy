@@ -41,8 +41,6 @@ class Thesis(models.Model):
         # Save the status so that, when saving, we can determine whether or not it changed
         # See https://stackoverflow.com/a/1793323
         self.__original_status = self.status
-        # See get_students
-        self.__sort_criterion = f'{Thesis.students.through._meta.db_table}.id'
 
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
     # the related_name's below are necessary because we have multiple foreign keys pointing
