@@ -5,7 +5,6 @@
 import { get as getCookie } from "js-cookie";
 import * as objectAssignDeep from "object-assign-deep";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import * as HttpStatus from "http-status-codes";
 import { compact } from "lodash";
 
 import { SortColumn, SortDirection, ThesesProcessParams } from "./app_types";
@@ -25,6 +24,7 @@ const REST_REQUEST_TIMEOUT = 10000;
 axios.defaults.timeout = REST_REQUEST_TIMEOUT;
 
 export const FAKE_USER = new AppUser(new Student(-1, "Fake user"), UserType.Student);
+const HTTP_STATUS_CONFLICT = 409;
 
 /**
  * Send a request to the backend including the csrf token
@@ -187,7 +187,7 @@ async function safeSendThesisRequest(url: string, config?: AxiosRequestConfig) {
 	} catch (err) {
 		if (err.response) {
 			const response: AxiosResponse = err.response;
-			if (response.status === HttpStatus.CONFLICT) {
+			if (response.status === HTTP_STATUS_CONFLICT) {
 				throw new ThesisNameConflict();
 			}
 		}
