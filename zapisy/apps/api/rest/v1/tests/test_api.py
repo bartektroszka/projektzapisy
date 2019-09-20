@@ -86,8 +86,8 @@ class VoteSystemTests(TestCase):
         client.force_authenticate(user=self.staff_member)
         response = client.get('/api/v1/votes/', {'state': self.state2.pk}, format='json')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 3)
-        self.assertCountEqual(response.data, [
+        self.assertEqual(len(response.data['results']), 3)
+        self.assertCountEqual(response.data['results'], [
             {
                 'student': self.students[1].pk,
                 'course_name': "Pranie",
