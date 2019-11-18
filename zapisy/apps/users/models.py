@@ -31,15 +31,6 @@ class BaseUser(models.Model):
     User abstract class. For every app user there is entry in django.auth.
     We do not inherit after User directly, because of problems with logging beckend etc.
     """
-    receive_mass_mail_enrollment = models.BooleanField(
-        default=True,
-        verbose_name="otrzymuje mailem ogłoszenia Zapisów")
-    receive_mass_mail_offer = models.BooleanField(
-        default=True,
-        verbose_name="otrzymuje mailem ogłoszenia OD")
-    receive_mass_mail_grade = models.BooleanField(
-        default=True,
-        verbose_name="otrzymuje mailem ogłoszenia Oceny Zajęć")
     last_news_view = models.DateTimeField(default=datetime.datetime.now)
 
     objects = Related()
@@ -74,11 +65,11 @@ class BaseUser(models.Model):
 
     @staticmethod
     def is_student(user: User) -> bool:
-        return is_user_in_group(user, 'students')
+        return hasattr(user, 'student')
 
     @staticmethod
     def is_employee(user: User) -> bool:
-        return is_user_in_group(user, 'employees')
+        return hasattr(user, 'employee')
 
     @staticmethod
     def is_external_contractor(user: User) -> bool:
