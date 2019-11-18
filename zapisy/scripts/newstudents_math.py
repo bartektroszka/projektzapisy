@@ -44,7 +44,8 @@ def random_pass():
 
 
 def send_email(address):
-    body = "Witaj,\n\nkonto zostało utworzone.\nlogin: nr indeksu\n\nHasło można uzyskać poprzez formularz:\nhttps://zapisy.ii.uni.wroc.pl/users/password-change/\n\nZespół zapisy.ii.uni.wroc.pl\n"
+    body = "Witaj,\n\nkonto zostało utworzone.\nlogin: nr indeksu\n\nHasło można uzyskać\
+ poprzez formularz:\nhttps://zapisy.ii.uni.wroc.pl/users/password-change/\n\nZespół zapisy.ii.uni.wroc.pl\n"
     subject = '[Zapisy] Nowe konto'
     Message.objects.create(
         to_address=address,

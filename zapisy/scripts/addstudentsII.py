@@ -30,10 +30,12 @@ def process(line):
 
     address = u.email
     if (address):
-        body = "Witaj na studiach II stopnia, \n\nw Systemie Zapisów zaktualizowano Twoje punkty ECTS i wygenerowano nowy czas otwarcia. \n\nZespół zapisy.ii.uni.wroc.pl\n"
+        body = "Witaj na studiach II stopnia, \n\nw Systemie Zapisów zaktualizowano\
+ Twoje punkty ECTS i wygenerowano nowy czas otwarcia. \n\nZespół zapisy.ii.uni.wroc.pl\n"
         subject = '[ZAPISY] Studia II stopnia - nowe T0'
         print('a')
-        #Message.objects.create(to_address=address, from_address='zapisy@cs.uni.wroc.pl', subject=subject, message_body=body)
+        #Message.objects.create(to_address=address,
+        #from_address='zapisy@cs.uni.wroc.pl', subject=subject, message_body=body)
 
 
 def run():

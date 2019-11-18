@@ -36,7 +36,8 @@ class SemesterAdmin(admin.ModelAdmin):
         ('Ocena', {'fields': ['is_grade_active', 'first_grade_semester', 'second_grade_semester']}),
         ('Czas trwania semestru', {'fields': ['semester_beginning', 'semester_ending']}),
         ('Czas trwania zajęć', {'fields': ['lectures_beginning', 'lectures_ending']}),
-        ('Czas trwania zapisów', {'fields': ['records_opening', 'records_ects_limit_abolition', 'records_ending', 'records_closing']}),
+        ('Czas trwania zapisów',
+         {'fields': ['records_opening', 'records_ects_limit_abolition', 'records_ending', 'records_closing']}),
         ('Czas trwania dezyderat', {'fields': ['desiderata_opening', 'desiderata_closing']}),
     ]
     list_editable = ('visible',)
@@ -93,7 +94,8 @@ class GuaranteedSpotsInline(admin.StackedInline):
     extra = 0
     fieldsets = ((None, {
         'fields': ('role', 'limit'),
-        'description': "<strong style='color: red'>Grupy użytkowników, którym gwarantujemy miejsca w jednej grupie zajęciowej muszą być rozłączne!</strong>",
+        'description': "<strong style='color: red'>Grupy użytkowników,\
+ którym gwarantujemy miejsca w jednej grupie zajęciowej muszą być rozłączne!</strong>",
     }), )
 
 

@@ -96,7 +96,8 @@ def email_change_view(request, extra_context={},
             send_mail('[Fereol] Weryfikacja zmiany adresu email', message, None, [email])
             messages.success(
                 request,
-                "Mail zawierający link weryfikacyjny został wysłany na Twój nowy adres email. Postępuj zgodnie z instrukcjami w tym mailu by z sukcesem zmienić Twój obecny adres email.")
+                "Mail zawierający link weryfikacyjny został wysłany na Twój nowy adres email.\
+Postępuj zgodnie z instrukcjami w tym mailu by z sukcesem zmienić Twój obecny adres email.")
             # Redirect
             return redirect(success_url)
 

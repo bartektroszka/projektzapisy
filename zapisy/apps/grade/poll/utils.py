@@ -131,8 +131,9 @@ def prepare_data(request, slug):
                 'group__teacher__user'):
             dict[poll.pk] = poll
 
-        data['polls'] = [((x_s_l7[0][0], x_s_l7[0][1]), slug == x_s_l7[0][1], [(id_t_st2[0], id_t_st2[1],
-                                                                                id_t_st2[2], dict[id_t_st2[0]].to_url_title(True)) for id_t_st2 in x_s_l7[1]]) for x_s_l7 in polls]
+        data['polls'] = [((x_s_l7[0][0], x_s_l7[0][1]), slug == x_s_l7[0][1],
+                          [(id_t_st2[0], id_t_st2[1], id_t_st2[2],
+                            dict[id_t_st2[0]].to_url_title(True)) for id_t_st2 in x_s_l7[1]]) for x_s_l7 in polls]
     else:
         data['polls'] = []
     finished = request.session.get("finished", default=[])
@@ -147,14 +148,16 @@ def prepare_data(request, slug):
                 'group__teacher__user'):
             dict[poll.pk] = poll
 
-        data['finished'] = [((x_s_l8[0][0], x_s_l8[0][1]), slug == x_s_l8[0][1], [(id_t_st3[0], id_t_st3[1],
-                                                                                   id_t_st3[2], dict[id_t_st3[0]].to_url_title(True)) for id_t_st3 in x_s_l8[1]]) for x_s_l8 in finished]
+        data['finished'] = [((x_s_l8[0][0], x_s_l8[0][1]), slug == x_s_l8[0][1],
+                             [(id_t_st3[0], id_t_st3[1], id_t_st3[2],
+                               dict[id_t_st3[0]].to_url_title(True)) for id_t_st3 in x_s_l8[1]]) for x_s_l8 in finished]
     else:
         data['finished'] = []
 
     data['finished_polls'] = len(request.session.get("finished", default=[]))
     data['all_polls'] = reduce(lambda x, y: x + y, [len(p_l[1])
-                                                    for p_l in request.session.get("polls", default=[])], data['finished_polls'])
+                                                    for p_l in request.session.get("polls", default=[])],
+                               data['finished_polls'])
     return data
 
 

@@ -182,7 +182,8 @@ class Poll(models.Model):
         where = [
             '((SELECT COUNT(*) FROM ticket_create_publickey WHERE poll_id = poll_poll.id GROUP BY poll_id) > 0)']
         if student:
-            count = '((SELECT COUNT(*) FROM ticket_create_usedticketstamp WHERE poll_id = poll_poll.id AND student_id = %d) = 0)' % student.id
+            count = '((SELECT COUNT(*) FROM ticket_create_usedticketstamp WHERE\
+poll_id = poll_poll.id AND student_id = %d) = 0)' % student.id
             where.append(count)
 
         return Poll.objects.filter(deleted=False, semester=semester)\

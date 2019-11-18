@@ -1120,7 +1120,8 @@ def poll_results(request, mode='S', poll_id=None, semester=None):
 
             if semester.is_grade_active:
                 data['completness'] = SafeText(
-                    "Liczba studentów, którzy zakończyli wypełniać ankietę: %d<br/>Liczba studentów którzy nie zakończyli wypełniać ankiety: %d" %
+                    "Liczba studentów, którzy zakończyli wypełniać ankietę:\
+ %d<br/>Liczba studentów którzy nie zakończyli wypełniać ankiety: %d" %
                     (sts_fin, sts_not_fin))
             else:
                 data['completness'] = SafeText(
